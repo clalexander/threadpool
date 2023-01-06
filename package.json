@@ -1,0 +1,11 @@
+{
+  "name": "threadpool",
+  "version": "0.0.0",
+  "description": "Threadpool connects InkSoft and Printful",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Christopher Alexander",
+  "license": "ISC"
+}

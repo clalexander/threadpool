@@ -1,0 +1,15 @@
+node_modules
+dist
+docs
+reports
+.nyc_output
+package.json
+tsconfig.json
+dist
+main/dist
+temp
+vendor
+.bundle
+public
+/jest.config.js
+.eslintrc.js
