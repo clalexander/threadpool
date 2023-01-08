@@ -1,0 +1,163 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Template has the capability to create all required resources for a Terraform backend. This includes a KMS key, DyanmoDB Table and S3 bucket with versioning and encryption enabled
+
+
+Parameters:
+
+  # Terraform
+  pS3BucketName:
+    Type: String
+    Description: Bucket where TF state is stored
+
+  pKmsKeyName:
+    Type: String
+    Description: Alias created for KMS key
+  
+  pDynamodbTableName:
+    Type: String
+    Description: Table used for Terraform state locking
+  
+  # Tagging
+  pEnvironmentTag:
+    Type: String
+    Description: Environment for default resource tagging
+    Default: production
+    AllowedValues:
+      - production
+      - staging
+      - sandbox
+      - development
+      - qa
+      - central
+
+
+
+Metadata:
+
+  AWS::CloudFormation::Interface:
+    ParameterLabels:
+      pS3BucketName:
+        default: S3 Bucket Name
+      pKmsKeyName:
+        default: KMS Key Alias
+      pDynamodbTableName:
+        default: DynamoDB Table Name
+      pEnvironmentTag:
+        default: Environment Tag
+        
+    ParameterGroups:
+      - Label:
+          default: Terraform Backend Settings
+        Parameters:
+          - pS3BucketName
+          - pKmsKeyName
+          - pDynamodbTableName
+      - Label:
+          default: Tagging
+        Parameters:
+          - pEnvironmentTag
+        
+    
+
+
+Resources:
+
+  tfKms:
+    Type: AWS::KMS::Key
+    Properties:
+      Enabled: true
+      EnableKeyRotation: true
+      Description: KMS Key for TF state encryption
+      KeyPolicy:
+        Version: 2012-10-17
+        Id: !Sub tf-${AWS::AccountId}-${AWS::Region}
+        Statement:
+          - 
+            Effect: Allow
+            Action: kms:*
+            Resource: "*"
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Sid: IAM Key Control   
+      Tags:
+        - Key: controlled-by
+          Value: !Sub cloudformation-${AWS::StackName}
+        - Key: environment
+          Value: !Ref pEnvironmentTag
+
+  tfKmsAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      TargetKeyId: !Ref tfKms
+      AliasName: !Sub alias/${pKmsKeyName}
+
+  tfS3Bucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Sub com.${AWS::AccountId}.${AWS::Region}.${pS3BucketName}
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - 
+            ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !Ref tfKms
+      Tags:
+        - Key: controlled-by
+          Value: !Sub cloudformation-${AWS::StackName}
+        - Key: environment
+          Value: !Ref pEnvironmentTag
+      
+  tfS3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref tfS3Bucket
+      PolicyDocument:
+        Statement:
+          - 
+            Action:
+              - s3:PutObject
+            Effect: Deny
+            Resource:
+              - !Sub arn:aws:s3:::${tfS3Bucket}/*
+            Principal: "*"
+            Condition:
+              StringNotEquals:
+                s3:x-amz-server-side-encryption-aws-kms-key-id:
+                  - !GetAtt tfKms.Arn
+
+  tfDynamodb:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref pDynamodbTableName
+      AttributeDefinitions:
+        - AttributeName: LockID
+          AttributeType: S
+      KeySchema:
+        - AttributeName: LockID
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      Tags:
+        - Key: controlled-by
+          Value: !Sub cloudformation-${AWS::StackName}
+        - Key: environment
+          Value: !Ref pEnvironmentTag
+      
+
+Outputs:
+
+  tfKmsArn:
+    Value: !GetAtt tfKms.Arn
+    Description: TF Backend KMS Key ARN
+
+  tfS3Bucket:
+    Value: !Ref tfS3Bucket
+    Description: TF Backend S3 bucket
+
+  tfDynamodbTable:
+    Value: !Ref pDynamodbTableName
+    Description: TF Backend DynamoDB Table
