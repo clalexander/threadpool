@@ -1,0 +1,431 @@
+#!/bin/bash
+
+function jqe {
+  value=$(jq -r $1 < /dev/stdin)
+  if [[ "$value" == "null" ]]; then
+    value=""
+  fi
+  echo $value
+}
+
+function fail {
+  printf '%s\n' "$1" >&2
+  exit "${2-1}"
+}
+
+function cdtf {
+  local dir=$1
+  shift
+  opwd=$PWD
+  cd $dir
+  tf "$@"
+  cd $opwd
+}
+
+function load-env-vars {
+  if [[ -f "$1" ]]; then
+    source $1
+    export $(cut -d= -f1 "$1")
+  fi;
+}
+
+function put-local-vars {
+  rm "$local_var_path"
+  echo "$1" > "$local_var_path"
+}
+
+function get-vars {
+  if [[ $vars_loaded == 0 ]]; then
+    aws s3api get-object --profile $profile --bucket $remote_state_bucket --key $remote_state_vars_key $local_var_path >/dev/null 2>&1 || not_exists=1
+    if [[ $not_exists == 1 ]]; then
+      put-local-vars "{}"
+    fi
+    vars_loaded=1
+  fi
+  echo $(cat $local_var_path)
+}
+
+function save-vars {
+  aws s3api put-object --profile $profile --bucket $remote_state_bucket --key $remote_state_vars_key --body $local_var_path --content-type "application/json" >/dev/null 2>&1 || fail "Save vars error!"
+}
+
+function get-var {
+  echo $(get-vars) | jq -r --arg key $1 '.[$key]'
+}
+
+function set-var {
+  result=$(echo $(get-vars) | jq --arg key $1 --arg value "$2" '.[$key] = $value')
+  put-local-vars "$result"
+  vars_need_writeback=1
+}
+
+function del-var {
+  result=$(echo $(get-vars) | jq --arg key $1 'del(.[$key])')
+  put-local-vars "$result"
+  vars_need_writeback=1
+}
+
+function clear-vars {
+  put-local-vars "{}"
+  vars_need_writeback=1
+}
+
+command=$1
+shift
+
+# process immediate command params
+case $command in
+  get-var)
+    if [ -n "$1" ] && [ ${1:0:1} != "-" ]; then
+      var_name=$1
+      shift 1
+    else
+      fail "Error argument missing for $command!"
+    fi
+    ;;
+  set-var)
+    if [ -n "$1" ] && [ ${1:0:1} != "-" ] && [ -n "$2" ]; then
+      var_name=$1
+      var_value=$2
+      shift 2
+    else
+      fail "Error arguments missing for $command!"
+    fi
+    ;;
+  del-var)
+    if [ -n "$1" ] && [ ${1:0:1} != "-" ]; then
+      var_name=$1
+      shift 1
+    else
+      fail "Error argument missing for $command!"
+    fi
+    ;;
+esac
+
+# process args
+while [[ $# -gt 0 ]]
+do
+  case $1 in
+    -r | --region)
+      if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
+        region=$2
+        shift 2
+      else
+        fail "Error argument missing for $1!"
+      fi
+      ;;
+    -e | --env | --environment)
+      if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
+        environment=$2
+        shift 2
+      else
+        fail "Error argument missing for $1!"
+      fi
+      ;;
+    -p | --profile)
+      if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
+        profile=$2
+        shift 2
+      else
+        fail "Error argument missing for $1!"
+      fi
+      ;;
+    -tfv | --tfvar)
+      if [ -n "$2" ] && [ ${2:0:1} != "-" ] && [ -n "$3" ] && [ ${3:0:1} != "-" ]; then
+        setvars="$setvars $2 $3"
+        shift 3
+      else
+        fail "Error arguments missing for $1!"
+      fi
+      ;;
+    -y | --yes)
+      YES=1
+      shift
+      ;;
+    -d | --distinct)
+      DISTINCT=1
+      shift
+      ;;
+    -s | --shared)
+      SHARED=1
+      shift
+      ;;
+    -R | --recursive)
+      RECURSIVE=1
+      shift
+      ;;
+    *)
+      PARAMS="$PARAMS $1"
+      shift
+      ;;
+  esac
+done
+
+echo $PWD
+
+# load env vars
+load-env-vars $PWD/.env
+load-env-vars $PWD/.env.$environment
+#   source $(cat $PWD/.env | xargs)
+#   export $(cut -d= -f1)
+# fi
+# if [[ -f "$PWD/.env.$environment" ]]; then
+#   source $(cat $PWD/.env.$environment | xargs)
+# fi
+
+if [[ "$DISTINCT" == "1" ]] || [[ "$SHARED" == "1" ]] || [[ "$RECURSIVE" == "1" ]]; then
+
+  set -e
+
+  # try to load tf.config
+  if [[ -f "$PWD/tfconfig.json" ]]; then
+    config=$(cat "$PWD/tfconfig.json")
+  else
+    # nothing to do
+    exit 0 
+  fi
+
+  recursive_flags="-R"
+  other_flags="-y"
+
+  if [[ ! -z "$environment" ]]; then
+    env_input="-e $environment"
+  fi
+  if [[ ! -z "$region" ]]; then
+    reg_input="-r $region"
+  fi
+
+  if [[ "$command" == "destroy" ]]; then
+    REVERSE=1
+  fi
+
+  if [[ "$SHARED" == "1" ]]; then
+    dirs=$(echo "$config" | jqe '.shared')
+    if [[ ! -z "$dirs" ]]; then
+      if [[ "$REVERSE" == "1" ]];  then
+        dirs=$(echo "$dirs" | jq 'reverse')
+      fi
+      for dir in $(echo "$dirs" | jqe '.[]'); do
+        cdtf $dir $command $reg_input $other_flags $OPTIONS $PARAMS
+      done
+    fi
+    recursive_flags="$recursive_flags -s"
+  fi
+
+  if [[ "$DISTINCT" == "1" ]]; then
+    dirs=$(echo "$config" | jqe '.distinct')
+    if [[ ! -z "$dirs" ]]; then
+      if [[ "$REVERSE" == "1" ]];  then
+        dirs=$(echo "$dirs" | jq 'reverse')
+      fi
+      for dir in $(echo "$dirs" | jqe '.[]'); do
+        cdtf $dir $command $env_input $reg_input $other_flags $OPTIONS $PARAMS
+      done
+    fi
+    recursive_flags="$recursive_flags -d"
+  fi
+
+  if [[ "$RECURSIVE" == "1" ]]; then
+    dirs=$(echo "$config" | jqe '.recursive')
+    if [[ ! -z "$dirs" ]]; then
+      if [[ "$REVERSE" == "1" ]];  then
+        dirs=$(echo "$dirs" | jq 'reverse')
+      fi
+      for dir in $(echo "$dirs" | jqe '.[]'); do
+        cdtf $dir $command $env_input $reg_input $other_flags $recursive_flags $OPTIONS $PARAMS
+      done
+    fi
+  fi
+
+else # use pwd to run terraform
+
+  # try to load .config
+  if [[ -f "$PWD/.config" ]]; then
+    config=$(cat "$PWD/.config")
+    keypath=$(echo "$config" | jqe '.tfStateKeypath')
+    if [[ -z "$environment" ]]; then
+      environment=$(echo "$config" | jqe '.environment')
+    fi
+    remotevars=$(echo "$config" | jqe '.remoteVars')
+    if [[ $remotevars == "" ]]; then
+      remotevars="[]"
+    fi
+  fi
+
+  # default keypath
+  if [[ -z "$keypath" ]]; then
+    keypath=${PWD##/*/terraform/}
+    if [[ "$keypath" == "$PWD" ]]; then
+      keypath=""
+    fi
+  fi
+
+  # other defaults
+  region=${region:-$AWS_DEFAULT_REGION}
+  workspace=${workspace:-$environment}
+  profile=${profile:-synaptech}
+
+  # other variables
+  bin_dir=$(dirname "$0")
+  bin_config=$(cat "$bin_dir/.config")
+  remote_state_bucket=$(echo $REMOTE_STATE_BUCKET | xargs)
+  remote_state_key="$APPLICATION/$keypath"
+  remote_state_vars_key="env:/$environment/$remote_state_key.vars"
+  local_var_path="$bin_dir/.tfvars"
+  vars_loaded=0
+  vars_need_writeback=0
+
+  # verify parameters
+  if [[ -z "$AWS_ACCOUNT" ]]; then
+    fail "Error missing \$AWS_ACCOUNT env variable!"
+  fi
+  if [[ -z "$APPLICATION" ]]; then
+    fail "Error missing \$APPLICATION env variable!"
+  fi
+  if [[ -z "$keypath" ]]; then
+    fail "Error missing keypath!"
+  fi
+  if [[ -z "$environment" ]]; then
+    fail "Error missing --environment parameter or environment config option!"
+  fi
+  if [[ -z "$REMOTE_STATE_LOCK" ]]; then
+    fail "Error missing \$REMOTE_STATE_LOCK env variable!"
+  fi
+
+  check_env=$(echo "$bin_config" | jq --arg env "$environment" '.allowedEnvs[] | select(.==$env)')
+  if [[ -z "$check_env" ]]; then
+    fail "Error invalid environment: '$environment'"
+  fi
+
+  check_reg=$(echo "$bin_config" | jq --arg reg "$region" '.allowedRegions[] | select(.==$reg)')
+  if [[ -z "$check_reg" ]]; then
+    fail "Error invalid region: '$region'"
+  fi
+
+  # export terraform vars
+  export TF_VAR_application="$APPLICATION"
+  export TF_VAR_service_env="$environment"
+
+  export TF_VAR_aws_account="$AWS_ACCOUNT"
+  export TF_VAR_aws_region="$region"
+  export TF_VAR_aws_ecr_registry="$AWS_ECR_REGISTRY"
+  export TF_VAR_aws_profile="$AWS_PROFILE"
+
+  export TF_VAR_remote_state_bucket="$remote_state_bucket"
+  export TF_VAR_remote_state_key="$remote_state_key"
+  export TF_VAR_remote_state_lock="$REMOTE_STATE_LOCK"
+  export TF_VAR_shared_credentials_file="$SHARED_CREDENTIALS_FILE"
+
+  # command specific actions
+  case $command in
+    init)
+      OPTIONS="$OPTIONS -backend-config \"bucket=$TF_VAR_remote_state_bucket\" -backend-config \"region=$TF_VAR_aws_region\" -backend-config \"key=$TF_VAR_remote_state_key\" -backend-config \"dynamodb_table=$TF_VAR_remote_state_lock\" -backend-config \"profile=$TF_VAR_aws_profile\" -backend-config \"shared_credentials_file=$TF_VAR_shared_credentials_file\""
+      EXEC_TF=1
+      YES=0
+      ;;
+    plan)
+      EXEC_TF=1
+      ADD_VARS=1
+      ;;
+    apply)
+      EXEC_TF=1
+      ADD_VARS=1
+      ;;
+    refresh)
+      EXEC_TF=1
+      ADD_VARS=1
+      ;;
+    destroy)
+      EXEC_TF=1
+      ADD_VARS=1
+      ;;
+    import)
+      EXEC_TF=1
+      ADD_VARS=1
+      ;;
+    get-vars)
+      get-vars | jq
+      ;;
+    get-var)
+      echo $(get-var $var_name)
+      ;;
+    set-var)
+      set-var "$var_name" "$var_value"
+      ;;
+    del-var)
+      del-var $var_name
+      ;;
+    clear-vars)
+      clear-vars
+      ;;
+  esac
+
+  # loop over set vars
+  set -- $setvars
+  while [[ $# -gt 0 ]]
+  do
+    set-var "$1" "$2"
+    shift 2
+  done
+
+  # save remote vars
+  if [[ $vars_need_writeback == 1 ]]; then
+    save-vars
+  fi
+
+  # maybe execute terraform command
+  if [[ $EXEC_TF == 1 ]]; then
+
+    # add env var file
+    if [[ "$ADD_VARS" == "1" && -f "$PWD/$environment.tfvars" ]]; then
+      OPTIONS="$OPTIONS -var-file=\"$environment.tfvars\""
+    fi
+
+    # add remote vars
+    if [[ $ADD_VARS == 1 ]]; then
+      for key in $(echo $(get-vars) | jq -r 'keys[]'); do
+        index=$(echo $remotevars | jq -r --arg key $key 'index($key)')
+        if [[ $index != "null" ]]; then
+          value=$(get-var $key)
+          OPTIONS="$OPTIONS -var '$key=$value'"
+        fi
+      done
+    fi
+
+    # command
+    OPTIONS=$(echo $OPTIONS | xargs)
+    PARAMS=$(echo $PARAMS | xargs)
+    cmd="terraform $command $OPTIONS $PARAMS"
+
+    # yes pipe into command
+    if [[ "$YES" == "1" ]]; then
+      cmd="$cmd <<< 'yes'"
+    fi
+
+    # check if workspace exists
+    existing_workspaces=$(terraform workspace list)
+    if [[ ! " ${existing_workspaces[*]} " =~ " ${environment} " ]]; then
+      # create workspace
+      terraform workspace new $environment
+    fi
+
+    # switch workspace
+    terraform workspace select $environment
+    # execute command
+    echo $cmd
+    eval "$cmd"
+
+    # fail if primary command failed
+    if [[ "$?" != "0" ]]; then
+      fail "Command failed: $cmd"
+    fi
+
+    script_path="$PWD/scripts/post-$command.sh"
+    if [[ -f $script_path ]]; then
+      outputs=$(terraform output -json)
+      $script_path "$outputs"
+    fi
+
+  fi
+
+fi
