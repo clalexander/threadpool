@@ -1,6 +1,8 @@
-import { Order } from './order';
+import { DateTimeRange } from './date-time-range';
+import { DeliveryMethods, Order } from './order';
 import { OrderPaymentStatus } from './order-payment-status';
 import { ProductionCard } from './production-card';
+import { ListOptions, OrderingOptions } from './request';
 
 export interface OrderSummary {
   ID: number;
@@ -47,4 +49,44 @@ export interface OrderSummary {
   ProductionCardCount: number;
   JobCount: number;
   ProductionCards: ProductionCard[];
+}
+
+export type OrderSummariesOrderByProperties =
+  | 'ID'
+  | 'Name'
+  | 'FirstName'
+  | 'LastName'
+  | 'CompanyName'
+  | 'ShippingMethod'
+  | 'EstimatedShipDate'
+  | 'ConfirmedShipDate'
+  | 'StoreName'
+  | 'DateCreated'
+  | 'DateShipped'
+  | 'TotalAmount'
+  | 'StatusDesription'
+  | 'PaymentStatus'
+  | 'Organization'
+  | 'ProductionStatus'
+  | 'Email';
+
+export interface OrderSummariesListOptions extends ListOptions,
+  OrderingOptions<OrderSummariesOrderByProperties> {
+  AssigneeIds?: string[];
+  ConfirmedShipDateRange?: DateTimeRange;
+  DateCreated?: DateTimeRange;
+  DateModifiedRange?: DateTimeRange;
+  DeliveryMethods?: DeliveryMethods[];
+  DueDateRange?: DateTimeRange;
+  EstimatedShipDateRange?: DateTimeRange;
+  IncludeProductionCards?: boolean;
+  OrderTypes?: Order.Type[];
+  Organizations?: string[];
+  PaymentSatuses?: OrderPaymentStatus[];
+  ProductionStatuses?: Order.ProductionStatus[];
+  SearchText?: string;
+  ShippingMethodIds?: number[];
+  ShippingVendorNames?: string[];
+  Status?: Order.Status;
+  StoreIds?: number[];
 }

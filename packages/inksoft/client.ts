@@ -5,14 +5,14 @@ import modules from './modules';
 import { AdditionalRequestOptions } from './types';
 import { serialize, transformResponse } from './utils';
 
-export interface InkSoftApiClientOptions {
+export interface InkSoftOptions {
   APIKey: string;
 }
 
-export class InkSoftApiClient extends ApiClient(modules) {
+export class InkSoft extends ApiClient(modules) {
   private APIKey: string;
 
-  constructor({ APIKey }: InkSoftApiClientOptions) {
+  constructor({ APIKey }: InkSoftOptions) {
     super({
       baseURL: INKSOFT_API_BASE_URL,
       paramsSerializer: {

@@ -7,12 +7,12 @@ import { PRINTFUL_API_BASE_URL } from './constants';
 import modules from './modules';
 import { AdditionalRequestOptions } from './types';
 
-export interface PrintfulApiClientOptions {
+export interface PrintfulOptions {
   token: string;
 }
 
-export class PrintfulApiClient extends ApiClient(modules) {
-  constructor({ token }: PrintfulApiClientOptions) {
+export class Printful extends ApiClient(modules) {
+  constructor({ token }: PrintfulOptions) {
     super({
       baseURL: PRINTFUL_API_BASE_URL,
       headers: {

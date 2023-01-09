@@ -1,4 +1,4 @@
-import { Address } from './address';
+import { Address } from '../../inksoft/types/address';
 import { PickupType } from './pickup-type';
 
 export interface ShippingMethod {

@@ -1,21 +1,21 @@
 import {
   CreateOrder,
   CreateOrderOptions,
+  Order,
   OrderListOptions,
   PagedResponse,
   PrintfulApiModule,
   Response,
-} from 'printful-api-client/types';
-import { Printful } from 'types';
+} from 'printful/types';
 
 export interface Orders {
-  list(options?: OrderListOptions): Promise<PagedResponse<Printful.Order[]>>;
-  get(id: string, storeId: string): Promise<Response<Printful.Order>>;
+  list(options?: OrderListOptions): Promise<PagedResponse<Order[]>>;
+  get(id: string, storeId: string): Promise<Response<Order>>;
   create(
     order: CreateOrder,
     storeId: string,
     options?: CreateOrderOptions,
-  ): Promise<Response<Printful.Order>>;
+  ): Promise<Response<Order>>;
 }
 
 const ordersModule: PrintfulApiModule<Orders> = {

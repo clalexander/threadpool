@@ -1,10 +1,15 @@
-import { InkSoftApiModule, Response } from 'inksoft-api-client/types';
-import { GetOrderOptions, OrderSummariesListOptions } from 'inksoft-api-client/types/order';
-import { InkSoft } from 'types';
+import {
+  GetOrderOptions,
+  InkSoftApiModule,
+  Order,
+  OrderSummariesListOptions,
+  OrderSummary,
+  Response,
+} from 'inksoft/types';
 
 export interface Orders {
-  listSummaries(options?: OrderSummariesListOptions): Promise<Response<InkSoft.OrderSummary[]>>;
-  get(options: GetOrderOptions): Promise<Response<InkSoft.Order>>;
+  listSummaries(options?: OrderSummariesListOptions): Promise<Response<OrderSummary[]>>;
+  get(options: GetOrderOptions): Promise<Response<Order>>;
 }
 
 const ordersModule: InkSoftApiModule<Orders> = {

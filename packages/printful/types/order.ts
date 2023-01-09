@@ -1,5 +1,6 @@
 import { Address } from './address';
 import { File } from './file';
+import { ListOptions } from './request';
 
 export interface Order {
   id: number;
@@ -150,4 +151,23 @@ export namespace Order {
     store_name?: string;
     custom_order_id: string;
   };
+}
+
+export interface OrderListOptions extends ListOptions {
+  status?: Order.Status;
+}
+
+export interface CreateOrder {
+  external_id?: string;
+  shipping?: string;
+  recipient: Address;
+  items: Order.Item[];
+  retail_costs?: Order.RetailCosts;
+  gift?: Order.Gift;
+  packing_slip?: Order.PackingSlip;
+}
+
+export interface CreateOrderOptions {
+  confirm?: boolean;
+  update_existing?: boolean;
 }

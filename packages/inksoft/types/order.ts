@@ -1,8 +1,6 @@
-import { Address } from './address';
 import { Contact } from './contact';
 import { CustomLineItem } from './custom-line-item';
 import { GiftCertificate } from './gift-certificate';
-import { LineItemNote } from './line-item-note';
 import { NameNumberSettingGroup } from './name-number-setting-group';
 import { NameNumberValue } from './name-number-value';
 import { OrderPaymentStatus } from './order-payment-status';
@@ -14,6 +12,8 @@ import { ShippingMethod } from './shipping-method';
 import { ShoppingCart } from './shopping-cart';
 import { SideColorway } from './side-colorway';
 import { TimelineEntry } from './timeline-entry';
+import { Address } from './address';
+import { LineItemNote } from './line-item-note';
 
 export interface Order {
   ID: number;
@@ -237,4 +237,12 @@ export namespace Order {
       }
     }
   }
+}
+
+export type DeliveryMethods = 'Pickup' | 'Shipping' | 'None';
+
+export interface GetOrderOptions {
+  OrderId: number;
+  OrderEmail: string;
+  IncludeProductionCards?: boolean;
 }
