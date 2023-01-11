@@ -2,6 +2,7 @@
   "include": [
     "packages/**/*",
     "services/**/*",
+    "*.js",
   ],
   "exclude": [
     "node_modules",
