@@ -20,6 +20,18 @@ module "network" {
 
 
 
+
+# ---------------------
+# Events Cloudwatch Log
+# ---------------------
+
+module "system-log" {
+  source = "./services/system-log"
+
+  eventbridge_rule_arn = module.eventbridge.eventbridge_rule_arns["all-events"]
+}
+
+
 # ----------------
 # Main eventbridge
 # ----------------

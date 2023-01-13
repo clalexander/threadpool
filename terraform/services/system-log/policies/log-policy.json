@@ -1,0 +1,30 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogStream"
+      ],
+      "Resource": "${CLOUDWATCH_LOG_GROUP_ARN}:*",
+      "Principal": {
+        "Service": "events.amazonaws.com"
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "logs:PutLogEvents"
+      ],
+      "Resource": "${CLOUDWATCH_LOG_GROUP_ARN}:*:*",
+      "Principal": {
+        "Service": "events.amazonaws.com"
+      },
+      "Condition": {
+        "ArnEquals": {
+          "aws:SourceArn": "${EVENTBRIDGE_RULE_ARN}"
+        }
+      }
+    }
+  ]
+}
