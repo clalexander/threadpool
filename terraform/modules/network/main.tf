@@ -142,9 +142,9 @@ resource "aws_default_network_acl" "this" {
     rule_no = 100
     action = "allow"
     protocol = -1
-    cidr_block = aws_vpc.this.cidr_block
     from_port = 0
     to_port = 0
+    cidr_block = aws_vpc.this.cidr_block
   }
 }
 
@@ -268,6 +268,22 @@ resource "aws_route_table_association" "private" {
 resource "aws_security_group" "public" {
   name = "PublicSecruityGroup"
   vpc_id = aws_vpc.this.id
+
+  ingress {
+    description = "Allow ephemeral ports ingress"
+    # rule_no = 13
+    # action = "allow"
+    protocol = "tcp"
+    from_port = 0
+    to_port = 65535
+    # cidr_block = local.public_cidr_block
+    cidr_blocks = [
+      "0.0.0.0/0"
+    ]
+    ipv6_cidr_blocks = [
+      "::/0"
+    ]
+  }
 
   egress {
     description = "Allow any external access needed"
