@@ -16,10 +16,12 @@ const ordersModule: InkSoftApiModule<Orders> = {
   methods: ({ makeRequest }) => ({
     listSummaries: (options?: OrderSummariesListOptions) => makeRequest({
       method: 'GET',
+      path: 'GetOrderSummaries',
       params: options,
     }),
     get: (options: GetOrderOptions) => makeRequest({
       method: 'GET',
+      path: 'GetOrder',
       params: options,
       omitApiKey: true,
     }),
