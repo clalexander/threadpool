@@ -138,8 +138,8 @@ do
         fail "Error arguments missing for $1!"
       fi
       ;;
-    -y | --yes)
-      YES=1
+    -a | --auto-approve)
+      AUTO_APPROVE=1
       shift
       ;;
     -d | --distinct)
@@ -321,7 +321,7 @@ else # use pwd to run terraform
     init)
       OPTIONS="$OPTIONS -backend-config \"bucket=$TF_VAR_remote_state_bucket\" -backend-config \"region=$TF_VAR_aws_region\" -backend-config \"key=$TF_VAR_remote_state_key\" -backend-config \"dynamodb_table=$TF_VAR_remote_state_lock\" -backend-config \"profile=$TF_VAR_aws_profile\" -backend-config \"shared_credentials_file=$TF_VAR_shared_credentials_file\""
       EXEC_TF=1
-      YES=0
+      AUTO_APPROVE=0
       ;;
     plan)
       EXEC_TF=1
@@ -392,15 +392,15 @@ else # use pwd to run terraform
       done
     fi
 
+    # auto approve
+    if [[ "$AUTO_APPROVE" == "1" ]]; then
+      OPTIONS="$OPTIONS -auto-approve"
+    fi
+
     # command
     OPTIONS=$(echo $OPTIONS | xargs)
     PARAMS=$(echo $PARAMS | xargs)
     cmd="terraform $command $OPTIONS $PARAMS"
-
-    # yes pipe into command
-    if [[ "$YES" == "1" ]]; then
-      cmd="$cmd <<< 'yes'"
-    fi
 
     # check if workspace exists
     existing_workspaces=$(terraform workspace list)
