@@ -49,9 +49,11 @@ export function transformResponse(data: JsonValue): any {
 }
 
 function maybeTransformDateString(str: string): string | Date {
-  const dateParsed = new Date(str);
-  if (dateParsed instanceof Date && dateParsed.toISOString() === str) {
-    return dateParsed;
-  }
+  try {
+    const dateParsed = new Date(str);
+    if (dateParsed instanceof Date && dateParsed.toISOString() === str) {
+      return dateParsed;
+    }
+  } catch (error) { /* empty */ }
   return str;
 }
