@@ -25,7 +25,7 @@ async function getInkSoftApiKey(): Promise<string> {
 
 let client: InkSoft;
 
-export const inksoftClient = async (): Promise<InkSoft> => {
+export const inksoft = async (): Promise<InkSoft> => {
   if (!client) {
     const apiKey = await getInkSoftApiKey();
     client = new InkSoft({ APIKey: apiKey });
