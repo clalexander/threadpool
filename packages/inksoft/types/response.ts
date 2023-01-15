@@ -10,7 +10,7 @@ export namespace Response {
   export type StatusCode = 'OK' | 'BadRequest' | 'NotFound' | 'InternalServerError';
 
   export interface Pagination {
-    TotalResult: number;
+    TotalResults: number;
     IncludedResults: number;
     Index: number;
   }

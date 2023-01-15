@@ -74,7 +74,7 @@ export interface OrderSummariesListOptions extends ListOptions,
   OrderingOptions<OrderSummariesOrderByProperties> {
   AssigneeIds?: string[];
   ConfirmedShipDateRange?: DateTimeRange;
-  DateCreated?: DateTimeRange;
+  DateCreatedRange?: DateTimeRange;
   DateModifiedRange?: DateTimeRange;
   DeliveryMethods?: DeliveryMethods[];
   DueDateRange?: DateTimeRange;
