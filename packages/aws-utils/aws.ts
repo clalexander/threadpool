@@ -4,6 +4,7 @@ import AWS from 'aws-sdk';
  * Specify api versions
  */
 AWS.config.apiVersions = {
+  s3: '2006-03-01',
   secretsmanager: '2017-10-17',
   ssm: '2014-11-06',
   sns: '2010-03-31',
@@ -14,6 +15,15 @@ AWS.config.apiVersions = {
  * Manages AWS object instaning
  */
 export class AwsManager {
+  /**
+   * Creates an AWS secret manager
+   *
+   * @returns {AWS.S3}
+   */
+  s3(): AWS.S3 {
+    return new AWS.S3();
+  }
+
   /**
    * Creates an AWS secret manager
    *
