@@ -1,7 +1,7 @@
 export type InkSoftOrderSyncEventType =
-  | 'inksoft.order_sync.started'
-  | 'inksoft.order_sync.completed'
-  | 'inksoft.order_sync.failed';
+  | 'inksoft.orders_sync.started'
+  | 'inksoft.orders_sync.completed'
+  | 'inksoft.orders_sync.failed';
 
 export type InkSoftOrderSummaryEventType =
   | 'inksoft.order_summary.fetched';
