@@ -17,23 +17,22 @@ const optionDefinitions = [
 const options = commandLineArgs(optionDefinitions, { partial: true });
 
 const defaultConfig = {
+  output: {
+    dir: 'dist',
+    format: 'cjs',
+  },
+  external: [
+    'aws-sdk',
+  ],
   plugins: [
     nodeResolve({
       preferBuiltins: true,
     }),
-    typescript(),
     commonjs({
       requireReturnsDefault: 'auto',
     }),
     json(),
     terser(),
-  ],
-  output: {
-    format: 'cjs',
-    dir: 'dist',
-  },
-  external: [
-    'aws-sdk',
   ],
 };
 
@@ -45,6 +44,12 @@ const entries = services
     ...defaultConfig,
     plugins: [
       ...defaultConfig.plugins,
+      typescript({
+        include: [
+          'packages/**/*',
+          `services/${service}/**/*`,
+        ],
+      }),
       zip({
         file: `${service}.zip`,
       }),

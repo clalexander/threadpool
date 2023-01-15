@@ -1,0 +1,6 @@
+{
+  "services": [
+    "data-lake-injest-events",
+    "inksoft-orders-sync"
+  ]
+}
