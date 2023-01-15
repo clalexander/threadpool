@@ -69,6 +69,7 @@ module "service" {
 
   attach_policy_jsons = true
   policy_jsons = var.lambda_execution_policies
+  number_of_policy_jsons = length(var.lambda_execution_policies)
 
   cloudwatch_logs_retention_in_days = var.log_retention_period
 
