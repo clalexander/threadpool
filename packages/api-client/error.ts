@@ -2,6 +2,8 @@
 import { AxiosError, AxiosResponse, HttpStatusCode } from 'axios';
 
 export class ApiError<T = unknown, D = any> extends Error {
+  public readonly type: string;
+
   public readonly code?: string;
 
   public readonly request?: any;
@@ -10,6 +12,7 @@ export class ApiError<T = unknown, D = any> extends Error {
 
   constructor(public readonly raw: AxiosError<T, D>) {
     super(raw.message);
+    this.type = this.constructor.name;
     this.code = raw.code;
     this.request = raw.request;
     this.response = raw.response;
