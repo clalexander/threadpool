@@ -9,6 +9,7 @@ export interface EventData<T = any> {
 }
 
 export interface Event<T = any> {
+  id?: string;
   object: string;
   created: Date;
   data: T;
