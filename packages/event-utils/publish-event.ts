@@ -3,7 +3,8 @@ import { aws } from 'aws-utils';
 import { envName } from 'utils';
 import { Event, EventType, EVENT_OBJECT } from './types';
 
-export const DEFAULT_EVENT_SOURCE = 'com.threadpool';
+export const DEFAULT_EVENT_SOURCE = 'threadpool';
+export const BATCH_SIZE = 10;
 
 const eventbridge = aws().eventbridge();
 
@@ -27,7 +28,7 @@ function makeEvent<T>(data: T, source: string, type: EventType): Event<T> {
   };
 }
 
-export const publishEvent = ({
+export const publishEvent = async ({
   bus,
   type,
   source,
@@ -59,9 +60,14 @@ export const publishEvent = ({
       Detail: JSON.stringify(makeEvent({}, eventSource, type)),
     }];
   }
-  const params = {
-    Entries: entries,
-  };
-  const request = eventbridge.putEvents(params);
-  return request.promise();
+  const promises: Promise<any>[] = [];
+  for (let i = 0; i < entries.length; i += BATCH_SIZE) {
+    const entriesChunk = entries.slice(i, i + BATCH_SIZE);
+    const params = {
+      Entries: entriesChunk,
+    };
+    const request = eventbridge.putEvents(params);
+    promises.push(request.promise());
+  }
+  await Promise.all(promises);
 };
