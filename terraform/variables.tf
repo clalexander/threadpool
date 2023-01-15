@@ -18,3 +18,20 @@ variable "vpc__public-subnets" {
     cidr_block = string
   }))
 }
+
+variable "inksoft__api-key-secret-id" {
+  type = string
+}
+
+variable "inksoft__orders-sync-frequency" {
+  type = number
+  description = "Frequency in minutes"
+}
+
+variable "inksoft__orders-sync-min-start-time-param-id" {
+  type = string
+}
+
+variable "inksoft__orders-sync-start-offset-param-id" {
+  type = string
+}

@@ -1,24 +1,50 @@
+locals {
+  packages_dir = "${abspath(path.module)}/../dist"
+}
+
 # ----------------------------
 # Threadpool networking module
 # ----------------------------
 
-module "network" {
-  source = "./modules/network"
+// Not using custom vpc for lambda functions because of the cost of the NAT Gateway
+# module "network" {
+#   source = "./modules/network"
 
-  service_name = "threadpool-network"
-  service_env = terraform.workspace
+#   service_name = "threadpool-network"
+#   service_env = terraform.workspace
   
-  vpc__cidr = var.vpc__cidr
-  vpc__public-subnets = var.vpc__public-subnets
-  vpc__private-subnets = var.vpc__private-subnets
-}
+#   vpc__cidr = var.vpc__cidr
+#   vpc__public-subnets = var.vpc__public-subnets
+#   vpc__private-subnets = var.vpc__private-subnets
+# }
 
 
 # ---------------
 # Service modules
 # ---------------
 
+module "inksoft-orders-sync-service" {
+  source = "./services/inksoft-orders-sync"
 
+  packages_dir = local.packages_dir
+  service_env = terraform.workspace
+
+  eventbridge_rule_arn = module.default-eventbridge.eventbridge_rule_arns["inksoft-orders-sync"]
+  target_eventbridge_arn = module.eventbridge.eventbridge_bus_arn
+
+  inksoft_api_key_secret_id = var.inksoft__api-key-secret-id
+  min_start_time_param_id = var.inksoft__orders-sync-min-start-time-param-id
+  start_offset_param_id = var.inksoft__orders-sync-start-offset-param-id
+}
+
+module "data-lake-injest-events" {
+  source = "./services/data-lake-injest-events"
+
+  packages_dir = local.packages_dir
+  service_env = terraform.workspace
+
+  eventbridge_arn = module.eventbridge.eventbridge_rule_arns["all-events"]
+}
 
 
 # ---------------------
@@ -40,23 +66,37 @@ module "eventbridge" {
   source  = "terraform-aws-modules/eventbridge/aws"
   version = "1.17.1"
   
-  bus_name = "threadpool-event-bus"
+  bus_name = "threadpool"
 
-  # rules = {
-  #   crons = {
-  #     description = "Test cron trigger for lambda"
-  #     schedule_expression = "rate(1 minute)"
-  #   }
-  # }
+  create_schemas_discoverer = true
 
-  # targets = {
-  #   crons = [
-  #     {
-  #       name = "test-lambda-cron"
-  #       arn = module.test-service.lambda_function.arn
-  #     }
-  #   ]
-  # }
+  attach_cloudwatch_policy = true
+  cloudwatch_target_arns = [module.system-log.log_group.arn]
+
+  attach_sqs_policy = true
+  sqs_target_arns = [
+    module.data-lake-injest-events.events_queue.arn
+  ]
+
+  rules = {
+    all-events = {
+      description = "All events from the bus"
+      event_pattern = jsonencode({ "source" : [{"prefix": ""}] })
+    }
+  }
+
+  targets = {
+    all-events = [
+      {
+        name = "send-to-data-lake"
+        arn = module.data-lake-injest-events.events_queue.arn
+      },
+      {
+        name = "log-all-to-cloudwatch"
+        arn = module.system-log.log_group.arn
+      }
+    ]
+  }
 
   tags = {
     Name = "threadpool-event-bus"
@@ -77,16 +117,15 @@ module "default-eventbridge" {
   rules = {
     inksoft-orders-sync = {
       description = "Cron trigger for InkSoft Orders Sync service"
-      schedule_expression = "rate(1 minute)"
+      schedule_expression = "cron(0/${var.inksoft__orders-sync-frequency} * * * ? *)"
     }
   }
 
   targets = {
-    crons = [
+    inksoft-orders-sync = [
       {
         name = "inksoft-orders-sync"
-        arn = module.test-service.lambda_function_arn
-        input = jsonencode({ "job" : "cron-by-rate" })
+        arn = module.inksoft-orders-sync-service.lambda_function_arn
       }
     ]
   }
