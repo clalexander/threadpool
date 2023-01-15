@@ -15,6 +15,9 @@
     "aws-sdk": "^2.1292.0",
     "axios": "^1.2.2",
     "cache-manager": "^5.1.4",
+    "fast-redact": "^3.1.2",
+    "hyperid": "^3.1.0",
+    "short-uuid": "^4.2.2",
     "type-fest": "^3.5.1"
   },
   "devDependencies": {
@@ -26,6 +29,7 @@
     "@types/aws-lambda": "^8.10.109",
     "@types/cache-manager": "^4.0.2",
     "@types/command-line-args": "^5.2.0",
+    "@types/fast-redact": "^3.0.2",
     "@types/node": "^18.11.18",
     "@typescript-eslint/eslint-plugin": "^5.48.0",
     "@typescript-eslint/parser": "^5.48.0",
