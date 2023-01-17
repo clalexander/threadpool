@@ -53,7 +53,7 @@ module "inksoft-order-summary-translator-service" {
   packages_dir = local.packages_dir
   service_env = terraform.workspace
 
-  inksoft_order_table_name = module.data-storage.inksoft_orders_table.name
+  inksoft_orders_table_name = module.data-storage.inksoft_orders_table.name
 
   eventbridge_rule_arn = module.eventbridge.eventbridge_rule_arns["inksoft-order-summary-received"]
   target_eventbridge_arn = module.eventbridge.eventbridge_bus_arn
