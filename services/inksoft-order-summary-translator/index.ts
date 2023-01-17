@@ -24,14 +24,14 @@ const eventHandler = async (event: Event<OrderSummary>) => {
     throw new Error('Missing order data!');
   }
   if (existingOrder === null) {
-    publishEvent({
+    await publishEvent({
       bus: TARGET_EVENTBRIDGE_ARN,
       type: OrderEventType.Received,
       data: order,
     });
     orderUpdated = true;
   } else if (isOrderUpdated(order, existingOrder)) {
-    publishEvent({
+    await publishEvent({
       bus: TARGET_EVENTBRIDGE_ARN,
       type: OrderEventType.Updated,
       data: order,
