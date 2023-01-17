@@ -14,4 +14,15 @@ resource "aws_dynamodb_table" "inksoft_orders" {
     name = "ID"
     type = "N"
   }
+
+  attribute {
+    name = "UniqueId"
+    type = "S"
+  }
+
+  global_secondary_index {
+    hash_key = "UniqueId"
+    projection_type = "KEYS_ONLY"
+    name = "UniqueId"
+  }
 }
