@@ -4,11 +4,12 @@ import AWS from 'aws-sdk';
  * Specify api versions
  */
 AWS.config.apiVersions = {
+  dynamodb: '2012-08-10',
+  eventbridge: '2015-10-07',
   s3: '2006-03-01',
   secretsmanager: '2017-10-17',
-  ssm: '2014-11-06',
   sns: '2010-03-31',
-  eventbridge: '2015-10-07',
+  ssm: '2014-11-06',
 };
 
 /**
@@ -16,7 +17,25 @@ AWS.config.apiVersions = {
  */
 export class AwsManager {
   /**
-   * Creates an AWS secret manager
+   * Creates an AWS DynamoDB
+   *
+   * @returns {AWS.DynamoDB}
+   */
+  dynamoDB(): AWS.DynamoDB {
+    return new AWS.DynamoDB();
+  }
+
+  /**
+   * Creates an AWS eventbridge
+   *
+   * @returns {AWS.EventBridge}
+   */
+  eventbridge(): AWS.EventBridge {
+    return new AWS.EventBridge();
+  }
+
+  /**
+   * Creates an AWS S3
    *
    * @returns {AWS.S3}
    */
@@ -34,15 +53,6 @@ export class AwsManager {
   }
 
   /**
-   * Creates an AWS Services Systems Manager (SSM)
-   *
-   * @returns {AWS.SSM}
-   */
-  ssm(): AWS.SSM {
-    return new AWS.SSM();
-  }
-
-  /**
    * Creates an AWS sns
    *
    * @returns {AWS.SNS}
@@ -52,12 +62,12 @@ export class AwsManager {
   }
 
   /**
-   * Creates an AWS sns
+   * Creates an AWS Services Systems Manager (SSM)
    *
-   * @returns {AWS.EventBridge}
+   * @returns {AWS.SSM}
    */
-  eventbridge(): AWS.EventBridge {
-    return new AWS.EventBridge();
+  ssm(): AWS.SSM {
+    return new AWS.SSM();
   }
 }
 
