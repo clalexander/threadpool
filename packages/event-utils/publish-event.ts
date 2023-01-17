@@ -1,7 +1,7 @@
 import { EventBridge } from 'aws-sdk';
 import { aws } from 'aws-utils';
 import { envName } from 'utils';
-import { Event, EventType, EVENT_OBJECT } from './types';
+import { Event, EVENT_OBJECT } from './types';
 
 export const DEFAULT_EVENT_SOURCE = 'threadpool';
 export const BATCH_SIZE = 10;
@@ -10,13 +10,13 @@ const eventbridge = aws().eventbridge();
 
 export interface PublishEventOptions {
   bus: string;
-  type: EventType;
+  type: string;
   data?: any | any[];
   source?: string;
   publishSeparateEvents?: boolean;
 }
 
-function makeEvent<T>(data: T, source: string, type: EventType): Event<T> {
+function makeEvent<T>(data: T, source: string, type: string): Event<T> {
   const environment = envName();
   return {
     object: EVENT_OBJECT,
