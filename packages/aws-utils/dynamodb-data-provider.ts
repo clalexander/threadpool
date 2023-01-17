@@ -1,3 +1,4 @@
+import { DynamoDB } from 'aws-sdk';
 import { aws } from './aws';
 
 export type ItemAttributeType = 'S' | 'N' | 'B';
@@ -7,10 +8,10 @@ export interface ItemAttribute {
   type: ItemAttributeType;
 }
 
-export interface DynamoDBDataProviderOptions {
-  dynamodb: AWS.DynamoDB;
-  tableName: string;
-  attributes: ItemAttribute[];
+export interface QuerySpec {
+  index?: string;
+  keyConditionExpression: string;
+  expressionAttributeValues: Record<string, string>;
 }
 
 type MarshalledAttribute = {
@@ -22,12 +23,14 @@ type MarshalledAttributes = Record<string, MarshalledAttribute>;
 export class DynamoDBDataProvider<
   T = any,
   KeyOptions extends Record<string, any> = Record<string, any>,
+  QueryOptions extends Record<string, any> = Record<string, any>,
 > {
   private readonly db = aws().dynamoDB();
 
   constructor(
     public readonly tableName: string,
     private readonly attributes: ItemAttribute[],
+    private readonly querySpecs: QuerySpec[] = [],
   ) {}
 
   protected marshallAttributes(value: any): MarshalledAttributes {
@@ -87,5 +90,31 @@ export class DynamoDBDataProvider<
     };
     const request = this.db.deleteItem(params);
     await request.promise();
+  }
+
+  public async queryItem(options: QueryOptions): Promise<T | null> {
+    const keys = Object.keys(options);
+    const spec = this.querySpecs.find((qs) => Object.keys(qs.expressionAttributeValues)
+      .every((key) => keys.includes(key)));
+    if (!spec) {
+      return null;
+    }
+    const marshalledAttributes = this.marshallAttributes(options);
+    const expressionAttributeValues = Object.entries(spec.expressionAttributeValues)
+      .reduce((acc, [key, value]) => ({ ...acc, [value]: marshalledAttributes[key] }), {});
+    const params = {
+      ExpressionAttributeValues: expressionAttributeValues,
+      KeyConditionExpression: spec.keyConditionExpression,
+      IndexName: spec.index,
+      TableName: this.tableName,
+    };
+    const request = this.db.query(params);
+    const result = await request.promise();
+    const item = result.Items?.[0];
+    if (!item) {
+      return null;
+    }
+    const keyOptions = DynamoDB.Converter.unmarshall(item) as KeyOptions;
+    return this.getItem(keyOptions);
   }
 }
