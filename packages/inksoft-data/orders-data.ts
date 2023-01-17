@@ -1,4 +1,4 @@
-import { DynamoDBDataProvider, ItemAttribute } from 'aws-utils';
+import { DynamoDBDataProvider, ItemAttribute, QuerySpec } from 'aws-utils';
 import { Order } from 'inksoft';
 import { transformResponse } from 'inksoft/utils';
 
@@ -16,11 +16,24 @@ export const InkSoftOrderAttributes: ItemAttribute[] = [
     name: 'StoreId',
     type: 'N',
   },
+  {
+    name: 'UniqueId',
+    type: 'S',
+  },
+];
+
+export const InkSoftOrderQuerySpecs: QuerySpec[] = [
+  {
+    keyConditionExpression: 'UniqueId = :uid',
+    expressionAttributeValues: {
+      UniqueId: ':uid',
+    },
+  },
 ];
 
 export class InkSoftOrdersData extends DynamoDBDataProvider<Order, InkSoftOrderKeyOptions> {
   constructor(tableName: string) {
-    super(tableName, InkSoftOrderAttributes);
+    super(tableName, InkSoftOrderAttributes, InkSoftOrderQuerySpecs);
   }
 
   protected parseObject(data: string) {
