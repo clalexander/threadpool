@@ -22,10 +22,12 @@
         "dynamodb:PutItem",
         "dynamodb:GetItem",
         "dynamodb:UpdateItem",
-        "dynamodb:DeleteItem"
+        "dynamodb:DeleteItem",
+        "dynamodb:Query"
       ],
       "Resource": [
-        "arn:aws:dynamodb:${AWS_REGION}:${AWS_ACCOUNT}:table/${TABLE_NAME}"
+        "arn:aws:dynamodb:${AWS_REGION}:${AWS_ACCOUNT}:table/${TABLE_NAME}",
+        "arn:aws:dynamodb:${AWS_REGION}:${AWS_ACCOUNT}:table/${TABLE_NAME}/index/*"
       ]
     }
   ]
