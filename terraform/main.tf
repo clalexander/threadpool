@@ -19,6 +19,16 @@ locals {
 # }
 
 
+
+# -----------------------
+# Threadpool data storage
+# -----------------------
+
+module "data-storage" {
+  source ="./services/data-storage"
+}
+
+
 # ---------------
 # Service modules
 # ---------------
@@ -37,13 +47,27 @@ module "inksoft-orders-sync-service" {
   start_offset_param_id = var.inksoft__orders-sync-start-offset-param-id
 }
 
+module "inksoft-order-summary-translator-service" {
+  source = "./services/inksoft-order-summary-translator"
+
+  packages_dir = local.packages_dir
+  service_env = terraform.workspace
+
+  inksoft_order_summaries_table_name = module.data-storage.inksoft_orders_table.name
+
+  eventbridge_rule_arn = module.eventbridge.eventbridge_rule_arns["inksoft-order-summary-received"]
+  target_eventbridge_arn = module.eventbridge.eventbridge_bus_arn
+
+  inksoft_api_key_secret_id = var.inksoft__api-key-secret-id
+}
+
 module "data-lake-injest-events" {
   source = "./services/data-lake-injest-events"
 
   packages_dir = local.packages_dir
   service_env = terraform.workspace
 
-  eventbridge_arn = module.eventbridge.eventbridge_rule_arns["all-events"]
+  eventbridge_rule_arn = module.eventbridge.eventbridge_rule_arns["all-events"]
 }
 
 
@@ -79,6 +103,10 @@ module "eventbridge" {
   ]
 
   rules = {
+    inksoft-order-summary-received = {
+      description = "Inksoft Order Summary Received events"
+      event_pattern = jsonencode({ "detail-type" : ["inksoft.order_summary.received"] })
+    }
     all-events = {
       description = "All events from the bus"
       event_pattern = jsonencode({ "source" : [{"prefix": ""}] })
@@ -86,6 +114,12 @@ module "eventbridge" {
   }
 
   targets = {
+    inksoft-order-summary-received = [
+      {
+        name = "send-to-inksoft-order-summary-translator"
+        arn = module.inksoft-order-summary-translator-service.events_queue.arn
+      }
+    ]
     all-events = [
       {
         name = "send-to-data-lake"

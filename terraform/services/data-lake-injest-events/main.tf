@@ -85,7 +85,7 @@ data "template_file" "events_queue_policy" {
   template = file("${path.module}/policies/events-queue-policy.json")
   vars = {
     EVENTS_QUEUE_ARN = module.event-processor.events_queue.arn
-    EVENTBRIDGE_ARN = var.eventbridge_arn
+    EVENTBRIDGE_ARN = var.eventbridge_rule_arn
   }
 }
 

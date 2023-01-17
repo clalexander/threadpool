@@ -1,6 +1,7 @@
 {
   "services": [
     "data-lake-injest-events",
-    "inksoft-orders-sync"
+    "inksoft-orders-sync",
+    "inksoft-order-summary-translator"
   ]
 }

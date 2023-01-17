@@ -12,10 +12,22 @@ variable "service_env" {
 #   default = []
 # }
 
+variable "inksoft_order_summaries_table_name" {
+  type = string
+}
+
 variable "eventbridge_rule_arn" {
   type = string
 }
 
+variable "target_eventbridge_arn" {
+  type = string
+}
+
 variable "packages_dir" {
+  type = string
+}
+
+variable "inksoft_api_key_secret_id" {
   type = string
 }
