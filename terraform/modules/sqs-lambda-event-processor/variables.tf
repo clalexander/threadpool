@@ -16,9 +16,9 @@ variable "events_queue_visibility_timeout" {
   default = 30
 }
 
-variable "events_queue_retry_count" {
+variable "events_queue_receive_count" {
   type = number
-  default = 5
+  default = 1
 }
 
 variable "events_queue_batch_size" {

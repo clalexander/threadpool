@@ -22,7 +22,7 @@ resource "aws_sqs_queue" "events" {
 
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.deadletter.arn
-    maxReceiveCount = var.events_queue_retry_count
+    maxReceiveCount = var.events_queue_receive_count
   })
 
   tags = local.tags
