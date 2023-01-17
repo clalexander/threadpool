@@ -6,7 +6,7 @@ data "template_file" "execution_policy" {
   vars = {
     AWS_ACCOUNT = data.aws_caller_identity.current.account_id
     AWS_REGION = data.aws_region.current.name
-    TABLE_NAME = var.inksoft_order_summaries_table_name
+    TABLE_NAME = var.inksoft_order_table_name
     TARGET_EVENTBRIDGE_ARN = var.target_eventbridge_arn
     INKSOFT_API_KEY_SECRET_ID = var.inksoft_api_key_secret_id
   }
@@ -28,7 +28,7 @@ module "event-processor" {
     SERVICE_ENV = var.service_env
     API_KEY_SECRET_ID = var.inksoft_api_key_secret_id
     TARGET_EVENTBRIDGE_ARN = var.target_eventbridge_arn
-    TABLE_NAME = var.inksoft_order_summaries_table_name
+    TABLE_NAME = var.inksoft_order_table_name
   }
 }
 

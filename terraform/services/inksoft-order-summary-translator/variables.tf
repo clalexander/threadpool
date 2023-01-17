@@ -12,7 +12,7 @@ variable "service_env" {
 #   default = []
 # }
 
-variable "inksoft_order_summaries_table_name" {
+variable "inksoft_order_table_name" {
   type = string
 }
 
