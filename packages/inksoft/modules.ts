@@ -1,4 +1,4 @@
-import ordersModule from './modules/order';
+import ordersModule from './modules/orders';
 
 const modules = {
   orders: ordersModule,
