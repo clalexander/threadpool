@@ -5,7 +5,7 @@ import {
   SQSBatchResponse,
   SQSEvent,
 } from 'aws-lambda';
-import { stringify } from './utils';
+import { safeStringify } from 'utils';
 
 export interface SQSHandlerOptions<T = any> {
   bodyParser?: (body: string) => T;
@@ -27,9 +27,9 @@ export const SQSHandler = <T>(
         event = bodyParser(record.body);
       } catch (error: any) {
         console.error('EVENT BODY PARSE ERROR!');
-        console.error(`${error.name}: ${error.message} ${stringify(error)}`, error.stack || 'No stack');
-        console.error(`Record: ${stringify(record)}`);
-        console.error(`Context: ${stringify(context)}`);
+        console.error(`${error.name}: ${error.message} ${safeStringify(error)}`, error.stack || 'No stack');
+        console.error(`Record: ${safeStringify(record)}`);
+        console.error(`Context: ${safeStringify(context)}`);
         batchItemFailures.push({ itemIdentifier: record.messageId });
         return;
       }
@@ -44,10 +44,10 @@ export const SQSHandler = <T>(
             eventRedact(event);
           }
           console.error('EVENT ERROR!');
-          console.error(`${error.name}: ${error.message} ${stringify(error)}`, error.stack || 'No stack');
-          console.error(`Event: ${stringify(event)}`);
-          console.error(`Message attributes: ${stringify(record.messageAttributes)}`);
-          console.error(`Context: ${stringify(context)}`);
+          console.error(`${error.name}: ${error.message} ${safeStringify(error)}`, error.stack || 'No stack');
+          console.error(`Event: ${safeStringify(event)}`);
+          console.error(`Message attributes: ${safeStringify(record.messageAttributes)}`);
+          console.error(`Context: ${safeStringify(context)}`);
           batchItemFailures.push({ itemIdentifier: record.messageId });
         }
       }
