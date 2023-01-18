@@ -1,5 +1,5 @@
 import { Address } from './address';
-import { File } from './file';
+import { File as MainFile } from './file';
 import { ListOptions } from './request';
 
 export interface Order {
@@ -38,7 +38,7 @@ export namespace Order {
     retail_price: string;
     name: string;
     product: Item.ProductVariant;
-    files: File[];
+    files: Item.File[];
     options: Item.Option[];
     sku: string;
     discontinued: boolean;
@@ -51,6 +51,27 @@ export namespace Order {
       product_id: number;
       image: string;
       name: string;
+    }
+
+    export interface File {
+      type: string;
+      url: string;
+      options: MainFile.Option[];
+      filename: string;
+      visible: boolean;
+      position: File.Position;
+    }
+
+    export namespace File {
+      export interface Position {
+        area_width: number;
+        area_height: number;
+        width: number;
+        height: number;
+        top: number;
+        left: number;
+        limit_to_print_area: boolean;
+      }
     }
 
     export interface Option {
@@ -161,10 +182,24 @@ export interface CreateOrder {
   external_id?: string;
   shipping?: string;
   recipient: Address;
-  items: Order.Item[];
+  items: CreateOrder.Item[];
   retail_costs?: Order.RetailCosts;
   gift?: Order.Gift;
   packing_slip?: Order.PackingSlip;
+}
+
+export namespace CreateOrder {
+  export type Item = Pick<Order.Item,
+  | 'sync_variant_id'
+  | 'quantity'
+  | 'retail_price'
+  | 'product'
+  > & Partial<Pick<Order.Item,
+  | 'name'
+  | 'files'
+  | 'options'
+  | 'sku'
+  >>;
 }
 
 export interface CreateOrderOptions {
