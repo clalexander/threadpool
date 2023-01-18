@@ -31,6 +31,7 @@ export class DynamoDBDataProvider<
     public readonly tableName: string,
     private readonly attributes: ItemAttribute[],
     private readonly querySpecs: QuerySpec[] = [],
+    private readonly storeItemInObjectJSON = false,
   ) {}
 
   protected marshallAttributes(value: any): MarshalledAttributes {
@@ -54,9 +55,13 @@ export class DynamoDBDataProvider<
     };
     const request = this.db.getItem(params);
     const result = await request.promise();
-    const item = result.Item;
-    if (!item) {
+    const marshalledItem = result.Item;
+    if (!marshalledItem) {
       return null;
+    }
+    const item = DynamoDB.Converter.unmarshall(marshalledItem);
+    if (!this.storeItemInObjectJSON) {
+      return item as T;
     }
     const { object } = item;
     if (!object) {
@@ -71,9 +76,11 @@ export class DynamoDBDataProvider<
 
   public async putItem(data: T): Promise<void> {
     const item = this.marshallAttributes(data);
-    item.object = {
-      S: JSON.stringify(data),
-    };
+    if (this.storeItemInObjectJSON) {
+      item.object = {
+        S: JSON.stringify(data),
+      };
+    }
     const params = {
       Item: item,
       TableName: this.tableName,
@@ -110,11 +117,14 @@ export class DynamoDBDataProvider<
     };
     const request = this.db.query(params);
     const result = await request.promise();
-    const item = result.Items?.[0];
-    if (!item) {
+    const marshalledItem = result.Items?.[0];
+    if (!marshalledItem) {
       return null;
     }
-    const keyOptions = DynamoDB.Converter.unmarshall(item) as KeyOptions;
-    return this.getItem(keyOptions);
+    const item = DynamoDB.Converter.unmarshall(marshalledItem);
+    if (!this.storeItemInObjectJSON) {
+      return item as T;
+    }
+    return this.getItem(item as KeyOptions);
   }
 }
