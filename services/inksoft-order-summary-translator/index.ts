@@ -1,7 +1,7 @@
 import { eventbridgeEventBodyParser, SQSHandler } from 'aws-utils';
 import { Event, publishEvent } from 'event-utils';
 import { inksoft, OrderSummary } from 'inksoft';
-import { InkSoftOrdersData } from 'inksoft-data';
+import { InkSoftOrdersData } from 'data-stores';
 import { TABLE_NAME, TARGET_EVENTBRIDGE_ARN } from './constants';
 import { OrderEventType, ServiceEventType } from './events';
 import { isOrderUpdated } from './utils';

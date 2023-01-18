@@ -24,6 +24,7 @@ export const InkSoftOrderAttributes: ItemAttribute[] = [
 
 export const InkSoftOrderQuerySpecs: QuerySpec[] = [
   {
+    index: 'UniqueId',
     keyConditionExpression: 'UniqueId = :uid',
     expressionAttributeValues: {
       UniqueId: ':uid',
@@ -33,7 +34,7 @@ export const InkSoftOrderQuerySpecs: QuerySpec[] = [
 
 export class InkSoftOrdersData extends DynamoDBDataProvider<Order, InkSoftOrderKeyOptions> {
   constructor(tableName: string) {
-    super(tableName, InkSoftOrderAttributes, InkSoftOrderQuerySpecs);
+    super(tableName, InkSoftOrderAttributes, InkSoftOrderQuerySpecs, true);
   }
 
   protected parseObject(data: string) {

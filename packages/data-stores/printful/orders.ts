@@ -41,6 +41,6 @@ PrintfulOrderKeyOptions,
 PrintfulOrderQueryOptions
 > {
   constructor(tableName: string) {
-    super(tableName, PrintfulOrderAttributes, PrintfulOrderQuerySpecs);
+    super(tableName, PrintfulOrderAttributes, PrintfulOrderQuerySpecs, true);
   }
 }
