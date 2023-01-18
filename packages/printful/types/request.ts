@@ -1,5 +1,5 @@
 export interface AdditionalRequestOptions {
-  storeId?: string;
+  storeId?: number;
 }
 
 export interface ListOptions {
