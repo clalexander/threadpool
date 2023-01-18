@@ -160,7 +160,7 @@ export namespace Order {
     ProductId: number;
     ProductStyleId: number;
     ProductStyleSizeId: number;
-    Quasntity: number;
+    Quantity: number;
     ArtId: number | null;
     DesignId: number | null;
     SideColorways: SideColorway[];
