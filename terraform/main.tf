@@ -61,6 +61,21 @@ module "inksoft-order-summary-translator-service" {
   inksoft_api_key_secret_id = var.inksoft__api-key-secret-id
 }
 
+module "printful-order-fulfillment-service" {
+  source = "./services/printful-order-fulfillment"
+
+  packages_dir = local.packages_dir
+  service_env = terraform.workspace
+
+  printful_orders_table_name = module.data-storage.printful_orders_table.name
+  stores_map_table_name = module.data-storage.stores_map_table.name
+
+  eventbridge_rule_arn = module.eventbridge.eventbridge_rule_arns["inksoft-order-received-updated"]
+  target_eventbridge_arn = module.eventbridge.eventbridge_bus_arn
+
+  printful_api_token_secret_id = var.printful__api-token-secret-id
+}
+
 module "data-lake-injest-events" {
   source = "./services/data-lake-injest-events"
 
@@ -107,6 +122,10 @@ module "eventbridge" {
       description = "Inksoft Order Summary Received events"
       event_pattern = jsonencode({ "detail-type" : ["inksoft.order_summary.received"] })
     }
+    inksoft-order-received-updated = {
+      description = "Inksoft Order received or updated events"
+      event_pattern = jsonencode({ "detail-type" : ["inksoft.order.received", "inksoft.order.updated"] })
+    }
     all-events = {
       description = "All events from the bus"
       event_pattern = jsonencode({ "source" : [{"prefix": ""}] })
@@ -118,6 +137,12 @@ module "eventbridge" {
       {
         name = "send-to-inksoft-order-summary-translator"
         arn = module.inksoft-order-summary-translator-service.events_queue.arn
+      }
+    ]
+    inksoft-order-received-updated = [
+      {
+        name = "send-to-printful-order-fulfillment"
+        arn = module.printful-order-fulfillment-service.events_queue.arn
       }
     ]
     all-events = [

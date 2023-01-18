@@ -35,3 +35,7 @@ variable "inksoft__orders-sync-min-start-time-param-id" {
 variable "inksoft__orders-sync-start-offset-param-id" {
   type = string
 }
+
+variable "printful__api-token-secret-id" {
+  type = string
+}
