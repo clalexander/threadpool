@@ -1,6 +1,6 @@
 import { EventBridge } from 'aws-sdk';
 import { aws } from 'aws-utils';
-import { envName } from 'utils';
+import { envName, safeStringify } from 'utils';
 import { Event, EVENT_OBJECT } from './types';
 
 export const DEFAULT_EVENT_SOURCE = 'threadpool';
@@ -46,18 +46,18 @@ export const publishEvent = async ({
     if (Array.isArray(data) && publishSeparateEvents) {
       entries = data.map((value) => ({
         ...baseEntryParams,
-        Detail: JSON.stringify(makeEvent(value, eventSource, type)),
+        Detail: safeStringify(makeEvent(value, eventSource, type)),
       }));
     } else {
       entries = [{
         ...baseEntryParams,
-        Detail: JSON.stringify(makeEvent(data, eventSource, type)),
+        Detail: safeStringify(makeEvent(data, eventSource, type)),
       }];
     }
   } else {
     entries = [{
       ...baseEntryParams,
-      Detail: JSON.stringify(makeEvent({}, eventSource, type)),
+      Detail: safeStringify(makeEvent({}, eventSource, type)),
     }];
   }
   const promises: Promise<any>[] = [];
