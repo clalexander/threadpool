@@ -32,7 +32,12 @@ const defaultConfig = {
       requireReturnsDefault: 'auto',
     }),
     json(),
-    terser(),
+    terser({
+      keep_classnames: true,
+      format: {
+        comments: false,
+      },
+    }),
   ],
 };
 
