@@ -7,13 +7,14 @@ import {
   PrintfulApiModule,
   Response,
 } from 'printful/types';
+import { maybeIdAsExternal } from './external-id';
 
 export interface Orders {
   list(options?: OrderListOptions): Promise<PagedResponse<Order[]>>;
-  get(id: string, storeId: string): Promise<Response<Order>>;
+  get(id: number | string, storeId: number, isIdExternal: boolean): Promise<Response<Order>>;
   create(
     order: CreateOrder,
-    storeId: string,
+    storeId: number,
     options?: CreateOrderOptions,
   ): Promise<Response<Order>>;
 }
@@ -25,12 +26,12 @@ const ordersModule: PrintfulApiModule<Orders> = {
       method: 'GET',
       params: options,
     }),
-    get: (id: string, storeId: string) => makeRequest({
+    get: (id: number | string, storeId: number, isIdExternal = false) => makeRequest({
       method: 'GET',
-      path: id,
+      path: maybeIdAsExternal(id, isIdExternal),
       storeId,
     }),
-    create: (order: CreateOrder, storeId: string, options?: CreateOrderOptions) => makeRequest({
+    create: (order: CreateOrder, storeId: number, options?: CreateOrderOptions) => makeRequest({
       method: 'POST',
       params: options,
       storeId,
