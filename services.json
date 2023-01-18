@@ -2,6 +2,7 @@
   "services": [
     "data-lake-injest-events",
     "inksoft-orders-sync",
-    "inksoft-order-summary-translator"
+    "inksoft-order-summary-translator",
+    "printful-order-fulfillment"
   ]
 }
