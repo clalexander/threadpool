@@ -3,8 +3,12 @@ import { PrintfulOrdersData, StoresMapData } from 'data-stores';
 import { Event, publishEvent } from 'event-utils';
 import { Order as InkSoftOrder } from 'inksoft';
 import { printful } from 'printful';
-import { envName } from 'utils';
-import { ORDERS_TABLE_NAME, STORES_MAP_TABLE_NAME, TARGET_EVENTBRIDGE_ARN } from './constants';
+import {
+  ALLOW_CREATE,
+  ORDERS_TABLE_NAME,
+  STORES_MAP_TABLE_NAME,
+  TARGET_EVENTBRIDGE_ARN,
+} from './constants';
 import {
   InkSoftOrderEventType,
   PrintfulOrderEventType,
@@ -61,7 +65,8 @@ const eventHandler = async (event: Event<InkSoftOrder>) => {
     console.log('printful variants', printfulVariants);
     const createOrder = makeCreatePrintfulOrder(inksoftOrder, printfulVariants);
     console.log('create order', createOrder);
-    if (envName() === 'production') {
+    // allow create when env ALLOW_CREATE is set
+    if (ALLOW_CREATE) {
       console.log('attempting to create Printful order');
       const response = await client.orders.create(createOrder, storeId, { confirm: true });
       await publishEvent({

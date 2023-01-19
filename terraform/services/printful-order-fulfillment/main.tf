@@ -27,6 +27,7 @@ module "event-processor" {
 
   lambda_env_vars = {
     SERVICE_ENV = var.service_env
+    ALLOW_CREATE = var.service_env == "production"
     API_TOKEN_SECRET_ID = var.printful_api_token_secret_id
     TARGET_EVENTBRIDGE_ARN = var.target_eventbridge_arn
     ORDERS_TABLE_NAME = var.printful_orders_table_name
