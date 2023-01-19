@@ -78,3 +78,26 @@ resource "aws_dynamodb_table" "stores_map" {
     projection_type = "ALL"
   }
 }
+
+resource "aws_dynamodb_table" "summary_events" {
+  name = "Threadpool_Summary_Events"
+  billing_mode = "PAY_PER_REQUEST"
+
+  hash_key = "type"
+  range_key = "id"
+
+  attribute {
+    name = "id"
+    type = "S"
+  }
+
+  attribute {
+    name = "type"
+    type = "S"
+  }
+
+  ttl {
+    enabled = true
+    attribute_name = "expires"
+  }
+}

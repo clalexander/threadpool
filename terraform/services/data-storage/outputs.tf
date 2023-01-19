@@ -9,3 +9,7 @@ output "printful_orders_table" {
 output "stores_map_table" {
   value = aws_dynamodb_table.stores_map
 }
+
+output "summary_events_table" {
+  value = aws_dynamodb_table.summary_events
+}

@@ -76,6 +76,17 @@ module "printful-order-fulfillment-service" {
   printful_api_token_secret_id = var.printful__api-token-secret-id
 }
 
+module "summary-injest-events" {
+  source = "./services/summary-injest-events"
+
+  packages_dir = local.packages_dir
+  service_env = terraform.workspace
+
+  summary_events_table_name = module.data-storage.summary_events_table.name
+
+  eventbridge_rule_arn = module.eventbridge.eventbridge_rule_arns["all-events"]
+}
+
 module "data-lake-injest-events" {
   source = "./services/data-lake-injest-events"
 
@@ -90,11 +101,12 @@ module "data-lake-injest-events" {
 # Events Cloudwatch Log
 # ---------------------
 
-module "system-log" {
-  source = "./services/system-log"
+# Leaving for now
+# module "system-log" {
+#   source = "./services/system-log"
 
-  eventbridge_rule_arn = module.eventbridge.eventbridge_rule_arns["all-events"]
-}
+#   eventbridge_rule_arn = module.eventbridge.eventbridge_rule_arns["all-events"]
+# }
 
 
 # ----------------
@@ -109,8 +121,8 @@ module "eventbridge" {
 
   create_schemas_discoverer = true
 
-  attach_cloudwatch_policy = true
-  cloudwatch_target_arns = [module.system-log.log_group.arn]
+  # attach_cloudwatch_policy = true
+  # cloudwatch_target_arns = [module.system-log.log_group.arn]
 
   attach_sqs_policy = true
   sqs_target_arns = [
@@ -151,9 +163,13 @@ module "eventbridge" {
         arn = module.data-lake-injest-events.events_queue.arn
       },
       {
-        name = "log-all-to-cloudwatch"
-        arn = module.system-log.log_group.arn
-      }
+        name = "send-to-summary-events"
+        arn = module.summary-injest-events.events_queue.arn
+      },
+      # {
+      #   name = "log-all-to-cloudwatch"
+      #   arn = module.system-log.log_group.arn
+      # },
     ]
   }
 

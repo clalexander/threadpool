@@ -3,6 +3,7 @@
     "data-lake-injest-events",
     "inksoft-orders-sync",
     "inksoft-order-summary-translator",
-    "printful-order-fulfillment"
+    "printful-order-fulfillment",
+    "summary-injest-events"
   ]
 }
