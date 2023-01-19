@@ -16,8 +16,6 @@
     "axios": "^1.2.2",
     "cache-manager": "^5.1.4",
     "fast-redact": "^3.1.2",
-    "hyperid": "^3.1.0",
-    "short-uuid": "^4.2.2",
     "type-fest": "^3.5.1"
   },
   "devDependencies": {
