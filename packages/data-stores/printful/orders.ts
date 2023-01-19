@@ -1,4 +1,4 @@
-import { DynamoDBDataProvider, ItemAttribute, QuerySpec } from 'aws-utils';
+import { DynamoDBDataProvider, QuerySpec } from 'aws-utils';
 import { Order } from 'printful';
 
 export interface PrintfulOrderKeyOptions {
@@ -10,21 +10,6 @@ export type PrintfulOrderQueryOptions = {
   external_id: string;
 };
 
-export const PrintfulOrderAttributes: ItemAttribute[] = [
-  {
-    name: 'id',
-    type: 'N',
-  },
-  {
-    name: 'store',
-    type: 'N',
-  },
-  {
-    name: 'external_id',
-    type: 'S',
-  },
-];
-
 export const PrintfulOrderQuerySpecs: QuerySpec[] = [
   {
     index: 'ExternalId',
@@ -32,6 +17,7 @@ export const PrintfulOrderQuerySpecs: QuerySpec[] = [
     expressionAttributeValues: {
       external_id: ':eid',
     },
+    getItemAfterQuery: true,
   },
 ];
 
@@ -41,6 +27,8 @@ PrintfulOrderKeyOptions,
 PrintfulOrderQueryOptions
 > {
   constructor(tableName: string) {
-    super(tableName, PrintfulOrderAttributes, PrintfulOrderQuerySpecs, true);
+    super(tableName, {
+      querySpecs: PrintfulOrderQuerySpecs,
+    });
   }
 }

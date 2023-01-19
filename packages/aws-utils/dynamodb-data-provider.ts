@@ -1,24 +1,18 @@
 import { DynamoDB } from 'aws-sdk';
+import { convertDateStrings, safeStringify } from 'utils';
 import { aws } from './aws';
-
-export type ItemAttributeType = 'S' | 'N' | 'B';
-
-export interface ItemAttribute {
-  name: string;
-  type: ItemAttributeType;
-}
 
 export interface QuerySpec {
   index?: string;
   keyConditionExpression: string;
   expressionAttributeValues: Record<string, string>;
+  getItemAfterQuery?: boolean;
 }
 
-type MarshalledAttribute = {
-  [Key in ItemAttributeType]?: string;
-};
-
-type MarshalledAttributes = Record<string, MarshalledAttribute>;
+export interface DynamoDBDataProviderOptions {
+  querySpecs?: QuerySpec[];
+  convertDateStrings?: boolean; // defaults to true
+}
 
 export class DynamoDBDataProvider<
   T = any,
@@ -29,26 +23,26 @@ export class DynamoDBDataProvider<
 
   constructor(
     public readonly tableName: string,
-    private readonly attributes: ItemAttribute[],
-    private readonly querySpecs: QuerySpec[] = [],
-    private readonly storeItemInObjectJSON = false,
+    private readonly options?: DynamoDBDataProviderOptions,
   ) {}
 
-  protected marshallAttributes(value: any): MarshalledAttributes {
-    return this.attributes
-      .filter((att) => value[att.name] !== undefined)
-      .reduce((acc, att) => ({
-        ...acc,
-        [att.name]: { [att.type]: value[att.name].toString() },
-      }), {});
+  protected get querySpecs() { return this.options?.querySpecs || []; }
+
+  protected get convertDateStrings() { return this.options?.convertDateStrings !== false; }
+
+  protected encodeItem(item: T): any {
+    return JSON.parse(safeStringify(item));
   }
 
-  protected parseObject(data: string): any {
-    return JSON.parse(data);
+  protected decodeItem(item: any): T | null {
+    if (this.convertDateStrings) {
+      convertDateStrings(item);
+    }
+    return item;
   }
 
   public async getItem(options: KeyOptions): Promise<T | null> {
-    const key = this.marshallAttributes(options);
+    const key = DynamoDB.Converter.marshall(options);
     const params = {
       Key: key,
       TableName: this.tableName,
@@ -60,29 +54,14 @@ export class DynamoDBDataProvider<
       return null;
     }
     const item = DynamoDB.Converter.unmarshall(marshalledItem);
-    if (!this.storeItemInObjectJSON) {
-      return item as T;
-    }
-    const { object } = item;
-    if (!object) {
-      return null;
-    }
-    const objectJson = object.S;
-    if (!objectJson) {
-      return null;
-    }
-    return this.parseObject(objectJson);
+    return this.decodeItem(item);
   }
 
-  public async putItem(data: T): Promise<void> {
-    const item = this.marshallAttributes(data);
-    if (this.storeItemInObjectJSON) {
-      item.object = {
-        S: JSON.stringify(data),
-      };
-    }
+  public async putItem(item: T): Promise<void> {
+    const encodedItem = this.encodeItem(item);
+    const marshalledItem = DynamoDB.Converter.marshall(encodedItem);
     const params = {
-      Item: item,
+      Item: marshalledItem,
       TableName: this.tableName,
     };
     const request = this.db.putItem(params);
@@ -90,7 +69,7 @@ export class DynamoDBDataProvider<
   }
 
   public async deleteItem(options: KeyOptions): Promise<void> {
-    const key = this.marshallAttributes(options);
+    const key = DynamoDB.Converter.marshall(options);
     const params = {
       Key: key,
       TableName: this.tableName,
@@ -106,7 +85,7 @@ export class DynamoDBDataProvider<
     if (!spec) {
       return null;
     }
-    const marshalledAttributes = this.marshallAttributes(options);
+    const marshalledAttributes = DynamoDB.Converter.marshall(options);
     const expressionAttributeValues = Object.entries(spec.expressionAttributeValues)
       .reduce((acc, [key, value]) => ({ ...acc, [value]: marshalledAttributes[key] }), {});
     const params = {
@@ -122,9 +101,9 @@ export class DynamoDBDataProvider<
       return null;
     }
     const item = DynamoDB.Converter.unmarshall(marshalledItem);
-    if (!this.storeItemInObjectJSON) {
-      return item as T;
+    if (spec.getItemAfterQuery) {
+      return this.getItem(item as KeyOptions);
     }
-    return this.getItem(item as KeyOptions);
+    return item as T;
   }
 }
