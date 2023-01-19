@@ -1,9 +1,10 @@
 import { ApiClient } from 'api-client';
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { convertDateStrings } from 'utils';
 import { INKSOFT_API_BASE_URL } from './constants';
 import modules from './modules';
 import { AdditionalRequestOptions } from './types';
-import { serialize, transformResponse } from './utils';
+import { serialize } from './utils';
 
 export interface InkSoftOptions {
   APIKey: string;
@@ -48,7 +49,7 @@ export class InkSoft extends ApiClient(modules) {
   protected responseInterceptor(response: AxiosResponse): AxiosResponse {
     return {
       ...response,
-      data: transformResponse(response.data),
+      data: convertDateStrings(response.data),
     };
   }
 }

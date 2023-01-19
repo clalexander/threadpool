@@ -1,5 +1,4 @@
 import { encode } from 'api-client';
-import { JsonValue } from 'types';
 
 export function serialize(data: any): string {
   if (!data || typeof data !== 'object') {
@@ -23,37 +22,4 @@ export function serialize(data: any): string {
     }
   });
   return parts.join('&');
-}
-
-export function transformResponse(data: JsonValue): any {
-  switch (typeof data) {
-    case 'number':
-    case 'boolean':
-      return data;
-    case 'string':
-      return maybeTransformDateString(data);
-    case 'object':
-      if (data === null) {
-        return data;
-      }
-      if (Array.isArray(data)) {
-        return data.map(transformResponse);
-      }
-      return Object.entries(data).reduce((acc, [key, value]) => {
-        acc[key] = transformResponse(value);
-        return acc;
-      }, {} as any);
-    default:
-      return data;
-  }
-}
-
-function maybeTransformDateString(str: string): string | Date {
-  try {
-    const dateParsed = new Date(str);
-    if (dateParsed instanceof Date && dateParsed.toISOString() === str) {
-      return dateParsed;
-    }
-  } catch (error) { /* empty */ }
-  return str;
 }
