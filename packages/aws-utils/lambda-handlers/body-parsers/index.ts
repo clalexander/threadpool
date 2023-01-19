@@ -1,1 +1,2 @@
-export * from './eventbridge-event-body-parser';
+export * from './default';
+export * from './eventbridge-event';

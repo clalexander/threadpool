@@ -6,6 +6,7 @@ import {
   SQSEvent,
 } from 'aws-lambda';
 import { safeStringify } from 'utils';
+import { defaultBodyParser } from './body-parsers';
 
 export interface SQSHandlerOptions<T = any> {
   bodyParser?: (body: string) => T;
@@ -18,7 +19,7 @@ export const SQSHandler = <T>(
   options?: SQSHandlerOptions<T>,
 ) => async (sqsEvent: SQSEvent, context: Context): Promise<SQSBatchResponse> => {
     const batchItemFailures: SQSBatchItemFailure[] = [];
-    const bodyParser = options?.bodyParser || ((body: string) => JSON.parse(body) as T);
+    const bodyParser = options?.bodyParser || defaultBodyParser;
     const errorHandler = options?.errorHandler;
     const eventProcessingPromises = sqsEvent.Records.map(async (record) => {
       let event: T;
