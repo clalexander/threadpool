@@ -1,15 +1,17 @@
 import { paramsSerializer } from 'api-client';
-import { aws, eventbridgeEventBodyParser, SQSHandler } from 'aws-utils';
+import { EventBridgeEvent } from 'aws-lambda';
+import { aws, SQSHandler } from 'aws-utils';
 import { Event } from 'event-utils';
-import { ID } from 'utils';
 import { BUCKET_NAME, LOG_EVENTS } from './constants';
 import { eventKey, eventMetadata, eventRedact } from './utils';
 
 const s3 = aws().s3();
 
-const eventHandler = async (event: Event) => {
-  // id
-  event.id = ID.shortUuid(); // eslint-disable-line no-param-reassign
+const eventHandler = async (ebEvent: EventBridgeEvent<string, Event>) => {
+  const event = {
+    ...ebEvent.detail,
+    id: ebEvent.id,
+  };
   // key
   const key = eventKey(event);
   // metadata
@@ -35,6 +37,5 @@ const eventHandler = async (event: Event) => {
 };
 
 export const handler = SQSHandler(eventHandler, {
-  eventRedact,
-  bodyParser: eventbridgeEventBodyParser,
+  eventRedact: (ebEvent) => eventRedact(ebEvent.detail),
 });
