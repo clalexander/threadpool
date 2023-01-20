@@ -7,7 +7,8 @@ import axios, {
   CreateAxiosDefaults,
   Method,
 } from 'axios';
-import { Constructor, Promisable } from 'types';
+import { Promisable } from 'type-fest';
+import { Constructor } from 'types';
 import {
   ApiError,
   BadGatewayApiError,

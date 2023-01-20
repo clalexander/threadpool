@@ -1,3 +1,3 @@
-import { JsonObject } from 'types';
+import { JsonObject } from 'type-fest';
 
 export type SerializableDictionary = JsonObject;
