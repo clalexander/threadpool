@@ -15,7 +15,6 @@ export const shouldCreateNewPrinfulOrder = (
   existingOrder: PrintfulOrder | null,
 ) => isInkSoftOrderInFulfillableState(inksoftOrder) && doesExistingOrderExist(existingOrder);
 
-// HERE is this correct?
 const isInkSoftOrderInFulfillableState = (order: InkSoftOrder) => order.Authorized
   && order.Paid
   && (!order.ApprovalRequired || order.ApprovalDate !== null)
