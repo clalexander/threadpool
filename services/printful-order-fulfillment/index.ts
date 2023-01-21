@@ -10,11 +10,6 @@ import {
   TARGET_EVENTBRIDGE_ARN,
 } from './constants';
 import {
-  InkSoftOrderEventType,
-  PrintfulOrderEventType,
-  ServiceEventType,
-} from './events';
-import {
   getPrintfulVariantExternalId,
   makeCreatePrintfulOrder,
   shouldCreateNewPrinfulOrder,
@@ -71,7 +66,7 @@ const eventHandler = async (event: Event<InkSoftOrder>) => {
       const response = await client.orders.create(createOrder, storeId, { confirm: true });
       await publishEvent({
         bus: TARGET_EVENTBRIDGE_ARN,
-        type: InkSoftOrderEventType.Sent,
+        type: 'inksoft.order.sent',
         data: inksoftOrder,
       });
       const newOrder = response.result;
@@ -79,7 +74,7 @@ const eventHandler = async (event: Event<InkSoftOrder>) => {
       await ordersData.putItem(newOrder);
       await publishEvent({
         bus: TARGET_EVENTBRIDGE_ARN,
-        type: PrintfulOrderEventType.Created,
+        type: 'printful.order.created',
         data: newOrder,
       });
     }
@@ -90,7 +85,7 @@ const errorHandler = async (error: any) => {
   // lifecycle: service failed
   await publishEvent({
     bus: TARGET_EVENTBRIDGE_ARN,
-    type: ServiceEventType.Failed,
+    type: 'service.printful_order_fulfillment.failed',
     data: error,
   });
   return false;

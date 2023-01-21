@@ -2,7 +2,6 @@ import { CronHandler } from 'aws-utils';
 import { publishEvent } from 'event-utils';
 import { inksoft, OrderSummariesListOptions, OrderSummary } from 'inksoft';
 import { TARGET_EVENTBRIDGE_ARN } from './constants';
-import { OrderSummaryEventType, ServiceEventType } from './events';
 import { getMinStartTime, getStartOffset } from './parameters';
 import { getState, setState } from './state';
 
@@ -12,7 +11,7 @@ const eventHandler = async () => {
   // lifecycle: service started
   await publishEvent({
     bus: TARGET_EVENTBRIDGE_ARN,
-    type: ServiceEventType.Started,
+    type: 'service.inksoft_orders_sync.started',
   });
   // get effective start time = (earliest start time || last start time) - start time offset
   const state = await getState();
@@ -49,7 +48,7 @@ const eventHandler = async () => {
   // produce order summary events
   await publishEvent({
     bus: TARGET_EVENTBRIDGE_ARN,
-    type: OrderSummaryEventType.Received,
+    type: 'inksoft.order_summary.received',
     data: orderSummaries,
     publishSeparateEvents: true,
   });
@@ -58,7 +57,7 @@ const eventHandler = async () => {
   // lifecycle: service completed
   await publishEvent({
     bus: TARGET_EVENTBRIDGE_ARN,
-    type: ServiceEventType.Completed,
+    type: 'service.inksoft_orders_sync.completed',
   });
 };
 
@@ -66,7 +65,7 @@ const errorHandler = async (error: any) => {
   // lifecycle: service failed
   await publishEvent({
     bus: TARGET_EVENTBRIDGE_ARN,
-    type: ServiceEventType.Failed,
+    type: 'service.inksoft_orders_sync.failed',
     data: error,
   });
   return false;

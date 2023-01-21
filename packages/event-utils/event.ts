@@ -1,4 +1,5 @@
 import { PartialDeep } from 'type-fest';
+import { EventType } from './event-type';
 
 export const EVENT_OBJECT = 'event';
 
@@ -13,6 +14,6 @@ export interface Event<T = any> {
   created: Date;
   data: T;
   source: string;
-  type: string;
+  type: EventType;
   environment: string;
 }

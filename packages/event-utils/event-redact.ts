@@ -1,7 +1,7 @@
 import FastRedact from 'fast-redact';
 import { Paths } from 'types';
 import { flattenPaths } from 'utils';
-import { Event } from './types';
+import { Event } from './event';
 
 export type EventRedactPaths = Paths | ((event: Event) => Paths);
 

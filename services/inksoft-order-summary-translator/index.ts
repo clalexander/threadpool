@@ -3,7 +3,6 @@ import { Event, publishEvent } from 'event-utils';
 import { inksoft, OrderSummary } from 'inksoft';
 import { InkSoftOrdersData } from 'data-stores';
 import { TABLE_NAME, TARGET_EVENTBRIDGE_ARN } from './constants';
-import { OrderEventType, ServiceEventType } from './events';
 import { isOrderUpdated } from './utils';
 
 const ordersData = new InkSoftOrdersData(TABLE_NAME);
@@ -26,14 +25,14 @@ const eventHandler = async (event: Event<OrderSummary>) => {
   if (existingOrder === null) {
     await publishEvent({
       bus: TARGET_EVENTBRIDGE_ARN,
-      type: OrderEventType.Received,
+      type: 'inksoft.order.received',
       data: order,
     });
     orderUpdated = true;
   } else if (isOrderUpdated(order, existingOrder)) {
     await publishEvent({
       bus: TARGET_EVENTBRIDGE_ARN,
-      type: OrderEventType.Updated,
+      type: 'inksoft.order.updated',
       data: order,
     });
     orderUpdated = true;
@@ -48,7 +47,7 @@ const errorHandler = async (error: any) => {
   // lifecycle: service failed
   await publishEvent({
     bus: TARGET_EVENTBRIDGE_ARN,
-    type: ServiceEventType.Failed,
+    type: 'service.inksoft_order_summary_translator.failed',
     data: error,
   });
   return false;
