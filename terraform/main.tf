@@ -29,6 +29,17 @@ module "data-storage" {
 }
 
 
+
+# ------------------------
+# Threadpool notifications
+# ------------------------
+
+module "notifications" {
+  source ="./services/notifications"
+}
+
+
+
 # ---------------
 # Service modules
 # ---------------
