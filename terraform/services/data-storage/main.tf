@@ -83,8 +83,7 @@ resource "aws_dynamodb_table" "summary_events" {
   name = "Threadpool_Summary_Events"
   billing_mode = "PAY_PER_REQUEST"
 
-  hash_key = "type"
-  range_key = "id"
+  hash_key = "id"
 
   attribute {
     name = "id"
@@ -96,8 +95,31 @@ resource "aws_dynamodb_table" "summary_events" {
     type = "S"
   }
 
+  attribute {
+    name = "object"
+    type = "S"
+  }
+
+  attribute {
+    name = "created"
+    type = "S"
+  }
+
   ttl {
     enabled = true
     attribute_name = "expires"
+  }
+
+  global_secondary_index {
+    name = "Type"
+    hash_key = "type"
+    projection_type = "ALL"
+  }
+
+  global_secondary_index {
+    name = "Created"
+    hash_key = "object"
+    range_key = "created"
+    projection_type = "ALL"
   }
 }

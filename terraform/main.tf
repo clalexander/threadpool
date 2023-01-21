@@ -99,6 +99,19 @@ module "summary-injest-events" {
   eventbridge_rule_arn = module.eventbridge.eventbridge_rule_arns["all-events"]
 }
 
+module "daily-summary" {
+  source = "./services/daily-summary"
+
+  packages_dir = local.packages_dir
+  service_env = terraform.workspace
+
+  eventbridge_rule_arn = module.default-eventbridge.eventbridge_rule_arns["daily-summary"]
+  target_eventbridge_arn = module.eventbridge.eventbridge_bus_arn
+
+  summary_events_table_name = module.data-storage.summary_events_table.name
+  sns_email_notifications_arn = module.notifications.sns_email_notifications.arn
+}
+
 module "data-lake-injest-events" {
   source = "./services/data-lake-injest-events"
 
@@ -206,6 +219,10 @@ module "default-eventbridge" {
       description = "Cron trigger for InkSoft Orders Sync service"
       schedule_expression = "cron(0/${var.inksoft__orders-sync-frequency} * * * ? *)"
     }
+    daily-summary = {
+      description = "Cron trigger for Threadpooly Daily Summary service"
+      schedule_expression = "cron(0 0 * * ? *)"
+    }
   }
 
   targets = {
@@ -213,6 +230,12 @@ module "default-eventbridge" {
       {
         name = "inksoft-orders-sync"
         arn = module.inksoft-orders-sync-service.lambda_function_arn
+      }
+    ]
+    daily-summary = [
+      {
+        name = "daily-summary"
+        arn = module.daily-summary.lambda_function_arn
       }
     ]
   }

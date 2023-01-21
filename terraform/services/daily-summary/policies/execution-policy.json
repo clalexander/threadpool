@@ -1,0 +1,33 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "events:PutEvents"
+      ],
+      "Resource": "${TARGET_EVENTBRIDGE_ARN}"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:GetItem",
+        "dynamodb:Query"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:${AWS_REGION}:${AWS_ACCOUNT}:table/${SUMMARY_EVENTS_TABLE_NAME}",
+        "arn:aws:dynamodb:${AWS_REGION}:${AWS_ACCOUNT}:table/${SUMMARY_EVENTS_TABLE_NAME}/index/*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "sns:Publish"
+      ],
+      "Resource": [
+        "${SNS_EMAIL_NOTIFICATIONS_ARN}"
+      ]
+    }
+  ]
+}

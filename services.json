@@ -4,6 +4,7 @@
     "inksoft-orders-sync",
     "inksoft-order-summary-translator",
     "printful-order-fulfillment",
-    "summary-injest-events"
+    "summary-injest-events",
+    "daily-summary"
   ]
 }
