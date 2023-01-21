@@ -81,7 +81,7 @@ module "service" {
   attach_policy_json = true
   policy_json = data.template_file.execution-policy.rendered
 
-  cloudwatch_logs_retention_in_days = 90
+  cloudwatch_logs_retention_in_days = 30
 
   create_current_version_allowed_triggers = false
   allowed_triggers = {
