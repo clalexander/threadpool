@@ -20,6 +20,7 @@
       "Effect": "Allow",
       "Action": [
         "dynamodb:PutItem",
+        "dynamodb:BatchGetItem",
         "dynamodb:GetItem",
         "dynamodb:UpdateItem",
         "dynamodb:DeleteItem",
