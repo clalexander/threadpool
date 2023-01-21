@@ -1,5 +1,6 @@
 locals {
   packages_dir = "${abspath(path.module)}/../dist"
+  is_prod = terraform.workspace == "production"
 }
 
 # ----------------------------
@@ -126,12 +127,13 @@ module "data-lake-injest-events" {
 # Events Cloudwatch Log
 # ---------------------
 
-# Leaving for now
-# module "system-log" {
-#   source = "./services/system-log"
+module "system-log" {
+  count = local.is_prod ? 0 : 1
 
-#   eventbridge_rule_arn = module.eventbridge.eventbridge_rule_arns["all-events"]
-# }
+  source = "./services/system-log"
+
+  eventbridge_rule_arn = module.eventbridge.eventbridge_rule_arns["all-events"]
+}
 
 
 # ----------------
@@ -146,8 +148,8 @@ module "eventbridge" {
 
   create_schemas_discoverer = true
 
-  # attach_cloudwatch_policy = true
-  # cloudwatch_target_arns = [module.system-log.log_group.arn]
+  attach_cloudwatch_policy = !local.is_prod
+  cloudwatch_target_arns = local.is_prod ? [] : [module.system-log[0].log_group.arn]
 
   attach_sqs_policy = true
   sqs_target_arns = [
@@ -191,10 +193,11 @@ module "eventbridge" {
         name = "send-to-summary-events"
         arn = module.summary-injest-events.events_queue.arn
       },
-      # {
-      #   name = "log-all-to-cloudwatch"
-      #   arn = module.system-log.log_group.arn
-      # },
+      {
+        count = local.is_prod ? 0 : 1
+        name = "log-all-to-cloudwatch"
+        arn = module.system-log[0].log_group.arn
+      },
     ]
   }
 
