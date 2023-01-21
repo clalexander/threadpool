@@ -24,7 +24,7 @@ module "event-processor" {
 
   lambda_env_vars = {
     SUMMARY_EVENTS_TABLE_NAME = var.summary_events_table_name
-    EVENT_TTL = 14 * 24 * 60 * 60 # two weeks
+    EVENT_TTL = var.event_ttl
   }
 }
 

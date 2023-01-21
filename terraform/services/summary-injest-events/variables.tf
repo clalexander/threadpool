@@ -23,3 +23,7 @@ variable "summary_events_table_name" {
 variable "packages_dir" {
   type = string
 }
+
+variable "event_ttl" {
+  type = number
+}
