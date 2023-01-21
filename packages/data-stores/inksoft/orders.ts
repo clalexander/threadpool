@@ -11,7 +11,7 @@ export const InkSoftOrderQuerySpecs: QuerySpec[] = [
     index: 'UniqueId',
     keyConditionExpression: 'UniqueId = :uid',
     expressionAttributeValues: {
-      UniqueId: ':uid',
+      ':uid': 'UniqueId',
     },
     getItemAfterQuery: true,
   },

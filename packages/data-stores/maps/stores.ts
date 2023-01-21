@@ -19,7 +19,7 @@ export const StoresMapQuerySpecs: QuerySpec[] = [
     index: 'PrintfulStoreId',
     keyConditionExpression: 'printful_store_id = :id',
     expressionAttributeValues: {
-      printful_store_id: ':id',
+      ':id': 'printful_store_id',
     },
   },
 ];

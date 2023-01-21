@@ -15,7 +15,7 @@ export const PrintfulOrderQuerySpecs: QuerySpec[] = [
     index: 'ExternalId',
     keyConditionExpression: 'external_id = :eid',
     expressionAttributeValues: {
-      external_id: ':eid',
+      ':eid': 'external_id',
     },
     getItemAfterQuery: true,
   },
