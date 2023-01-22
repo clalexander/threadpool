@@ -40,6 +40,6 @@ variable "printful__api-token-secret-id" {
   type = string
 }
 
-variable "summary-event__event-ttl" {
-  type = number
+variable "summary-event__event-ttl-param-id" {
+  type = string
 }

@@ -95,7 +95,7 @@ module "summary-injest-events" {
   service_env = terraform.workspace
 
   summary_events_table_name = module.data-storage.summary_events_table.name
-  event_ttl = var.summary-event__event-ttl
+  event_ttl_param_id = var.summary-event__event-ttl-param-id
 
   eventbridge_rule_arn = module.eventbridge.eventbridge_rule_arns["all-events"]
 }

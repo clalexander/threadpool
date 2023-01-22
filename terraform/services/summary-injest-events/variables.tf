@@ -24,6 +24,6 @@ variable "packages_dir" {
   type = string
 }
 
-variable "event_ttl" {
-  type = number
+variable "event_ttl_param_id" {
+  type = string
 }
