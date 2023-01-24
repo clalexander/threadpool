@@ -2,6 +2,7 @@ import { paramsSerializer } from 'api-client';
 import { EventBridgeEvent } from 'aws-lambda';
 import { aws, SQSHandler } from 'aws-utils';
 import { Event } from 'event-utils';
+import SuperJSON from 'superjson';
 import { BUCKET_NAME, LOG_EVENTS } from './constants';
 import { eventKey, eventMetadata, eventRedact } from './utils';
 
@@ -22,7 +23,7 @@ const eventHandler = async (ebEvent: EventBridgeEvent<string, Event>) => {
   const params = {
     Bucket: BUCKET_NAME,
     Key: key,
-    Body: JSON.stringify(event),
+    Body: SuperJSON.stringify(event),
     ContentType: 'application/json',
     StorageClass: 'INTELLIGENT_TIERING',
     Metadata: metadata,
@@ -32,7 +33,7 @@ const eventHandler = async (ebEvent: EventBridgeEvent<string, Event>) => {
   await response.promise();
   // maybe log event
   if (LOG_EVENTS) {
-    console.log(JSON.stringify(event)); // eslint-disable-line no-console
+    console.log(SuperJSON.stringify(event)); // eslint-disable-line no-console
   }
 };
 

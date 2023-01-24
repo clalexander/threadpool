@@ -1,6 +1,7 @@
 import { DynamoDB } from 'aws-sdk';
+import SuperJSON from 'superjson';
 import { JsonValue } from 'type-fest';
-import { convertDateStrings, safeStringify } from 'utils';
+import { convertDateStrings } from 'utils';
 import { aws } from './aws';
 
 const BATCH_GET_MAX_KEYS_LENGTH = 100;
@@ -45,7 +46,8 @@ export class DynamoDBDataProvider<
   protected marshallData(
     data: Record<string, any> | Record<string, any>[],
   ): DynamoDB.AttributeMap | DynamoDB.AttributeMap[] {
-    const jsonData = JSON.parse(safeStringify(data)) as Record<string, any> | Record<string, any>[];
+    const jsonData = SuperJSON
+      .parse(SuperJSON.stringify(data)) as Record<string, any> | Record<string, any>[];
     if (Array.isArray(jsonData)) {
       return jsonData.map((record) => DynamoDB.Converter.marshall(record));
     }

@@ -1,6 +1,7 @@
 import { EventBridge } from 'aws-sdk';
 import { aws } from 'aws-utils';
-import { envName, safeStringify } from 'utils';
+import SuperJSON from 'superjson';
+import { envName } from 'utils';
 import { Event, EVENT_OBJECT } from './event';
 import { EventType } from './event-type';
 
@@ -47,18 +48,18 @@ export const publishEvent = async ({
     if (Array.isArray(data) && publishSeparateEvents) {
       entries = data.map((value) => ({
         ...baseEntryParams,
-        Detail: safeStringify(makeEvent(value, eventSource, type)),
+        Detail: SuperJSON.stringify(makeEvent(value, eventSource, type)),
       }));
     } else {
       entries = [{
         ...baseEntryParams,
-        Detail: safeStringify(makeEvent(data, eventSource, type)),
+        Detail: SuperJSON.stringify(makeEvent(data, eventSource, type)),
       }];
     }
   } else {
     entries = [{
       ...baseEntryParams,
-      Detail: safeStringify(makeEvent({}, eventSource, type)),
+      Detail: SuperJSON.stringify(makeEvent({}, eventSource, type)),
     }];
   }
   const promises: Promise<any>[] = [];

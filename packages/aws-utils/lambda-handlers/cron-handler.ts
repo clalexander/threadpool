@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { Context } from 'aws-lambda';
-import { safeStringify } from 'utils';
+import SuperJSON from 'superjson';
 
 export interface CronHandlerOptions {
   errorHandler?: (error: any) => Promise<boolean>;
@@ -16,9 +16,9 @@ export const CronHandler = <T>(
     } catch (error: any) {
       if (errorHandler === undefined || !(await errorHandler(error))) {
         console.error('EVENT ERROR!');
-        console.error(`${error.name}: ${error.message} ${safeStringify(error)}`, error.stack || 'No stack');
-        console.error(`Data: ${safeStringify(data)}`);
-        console.error(`Context: ${safeStringify(context)}`);
+        console.error(`${error.name}: ${error.message} ${SuperJSON.stringify(error)}`, error.stack || 'No stack');
+        console.error(`Data: ${SuperJSON.stringify(data)}`);
+        console.error(`Context: ${SuperJSON.stringify(context)}`);
       }
     }
     return true;
