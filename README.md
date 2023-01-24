@@ -88,6 +88,7 @@ inksoft__orders-sync-frequency = <frequency-minutes>
 inksoft__orders-sync-min-start-time-param-id = "<param-id>"
 inksoft__orders-sync-start-offset-param-id =  "<param-id>"
 printful__api-token-secret-id = "<secret-id>"
+printful-webhook__token-secret-id = "<secret-id>"
 summary-event__event-ttl-param-id = "<param-id>"
 ```
 

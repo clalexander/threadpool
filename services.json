@@ -5,6 +5,7 @@
     "inksoft-order-summary-translator",
     "printful-order-fulfillment",
     "summary-injest-events",
-    "daily-summary"
+    "daily-summary",
+    "printful-webhook"
   ]
 }

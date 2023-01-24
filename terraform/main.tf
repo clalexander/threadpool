@@ -88,6 +88,17 @@ module "printful-order-fulfillment-service" {
   printful_api_token_secret_id = var.printful__api-token-secret-id
 }
 
+module "printful-webhook" {
+  source = "./services/printful-webhook"
+
+  packages_dir = local.packages_dir
+  service_env = terraform.workspace
+
+  target_eventbridge_arn = module.eventbridge.eventbridge_bus_arn
+
+  webhook_token_secret_id = var.printful-webhook__token-secret-id
+}
+
 module "summary-injest-events" {
   source = "./services/summary-injest-events"
 
