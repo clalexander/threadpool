@@ -1,5 +1,4 @@
 import { CachedSecretsProvider } from 'secrets';
-import SuperJSON from 'superjson';
 import { aws } from './aws';
 
 export class SecretsManagerProvider extends CachedSecretsProvider {
@@ -14,6 +13,6 @@ export class SecretsManagerProvider extends CachedSecretsProvider {
     if (!stringVal) {
       throw new Error(`Secret ${secretId} has no value!`);
     }
-    return SuperJSON.parse(stringVal);
+    return JSON.parse(stringVal);
   }
 }

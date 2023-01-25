@@ -1,3 +1,6 @@
-import SuperJSON from 'superjson';
+import { convertDateStrings } from 'utils';
 
-export const defaultBodyParser = <T>(body: string): T => SuperJSON.parse(body);
+export const defaultBodyParser = <T>(body: string): T => {
+  const data = JSON.parse(body);
+  return convertDateStrings(data);
+};

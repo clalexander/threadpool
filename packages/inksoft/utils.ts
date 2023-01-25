@@ -1,5 +1,4 @@
 import { encode } from 'api-client';
-import SuperJSON from 'superjson';
 
 export function serialize(data: any): string {
   if (!data || typeof data !== 'object') {
@@ -17,7 +16,7 @@ export function serialize(data: any): string {
     if (Array.isArray(value)) {
       pushPart(key, `[${value.join(',')}]`);
     } else if (typeof value === 'object' && value !== null) {
-      pushPart(key, SuperJSON.stringify(value));
+      pushPart(key, JSON.stringify(value));
     } else {
       pushPart(key, value as string | number | boolean);
     }
