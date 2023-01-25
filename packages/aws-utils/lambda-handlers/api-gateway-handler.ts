@@ -5,7 +5,7 @@ import {
   APIGatewayProxyResultV2,
   Context,
 } from 'aws-lambda';
-import SuperJSON from 'superjson';
+import { safeStringify } from 'utils';
 import { defaultBodyParser } from './body-parsers';
 
 export interface APIGatewayHandlerOptions<T = any> {
@@ -50,9 +50,9 @@ export const APIGatewayHandler = <T>(
         eventRedact(event);
       }
       console.error('BODY PARSE ERROR!');
-      console.error(`${error.name}: ${error.message} ${SuperJSON.stringify(error)}`, error.stack || 'No stack');
-      console.error(`Event: ${SuperJSON.stringify(event)}`);
-      console.error(`Context: ${SuperJSON.stringify(context)}`);
+      console.error(`${error.name}: ${error.message} ${safeStringify(error)}`, error.stack || 'No stack');
+      console.error(`Event: ${safeStringify(event)}`);
+      console.error(`Context: ${safeStringify(context)}`);
       return defaultServerError;
     }
     // try to handle event
@@ -71,10 +71,10 @@ export const APIGatewayHandler = <T>(
         eventRedact(event);
       }
       console.error('EVENT ERROR!');
-      console.error(`${error.name}: ${error.message} ${SuperJSON.stringify(error)}`, error.stack || 'No stack');
-      console.error(`Data: ${SuperJSON.stringify(data)}`);
-      console.error(`Event: ${SuperJSON.stringify(event)}`);
-      console.error(`Context: ${SuperJSON.stringify(context)}`);
+      console.error(`${error.name}: ${error.message} ${safeStringify(error)}`, error.stack || 'No stack');
+      console.error(`Data: ${safeStringify(data)}`);
+      console.error(`Event: ${safeStringify(event)}`);
+      console.error(`Context: ${safeStringify(context)}`);
       return defaultServerError;
     }
   };
