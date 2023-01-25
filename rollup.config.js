@@ -24,13 +24,6 @@ const defaultConfig = {
   external: [
     'aws-sdk',
   ],
-  // @ts-ignore
-  onwarn(warning, warn) {
-    // skip this is undefined warning for superjson
-    if (warning.code === 'THIS_IS_UNDEFINED' && /superjson/.test(warning.id)) return;
-    // default handler otherwise
-    warn(warning);
-  },
   plugins: [
     nodeResolve({
       preferBuiltins: true,
