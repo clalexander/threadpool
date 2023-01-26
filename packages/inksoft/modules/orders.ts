@@ -1,4 +1,5 @@
 import {
+  CreateOrderShipmentsOptions,
   GetOrderOptions,
   InkSoftApiModule,
   Order,
@@ -10,6 +11,7 @@ import {
 export interface Orders {
   listSummaries(options?: OrderSummariesListOptions): Promise<Response<OrderSummary[]>>;
   get(options: GetOrderOptions): Promise<Response<Order>>;
+  createShipments(options: CreateOrderShipmentsOptions): Promise<Response<boolean>>;
 }
 
 const ordersModule: InkSoftApiModule<Orders> = {
@@ -24,6 +26,11 @@ const ordersModule: InkSoftApiModule<Orders> = {
       path: 'GetOrder',
       params: options,
       omitApiKey: true,
+    }),
+    createShipments: (options: CreateOrderShipmentsOptions) => makeRequest({
+      method: 'POST',
+      path: 'CreateOrderShipments',
+      data: options,
     }),
   }),
 };

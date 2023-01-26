@@ -73,6 +73,20 @@ module "inksoft-order-summary-translator-service" {
   inksoft_api_key_secret_id = var.inksoft__api-key-secret-id
 }
 
+module "inksoft-order-shipments-writeback-service" {
+  source = "./services/inksoft-order-shipments-writeback"
+
+  packages_dir = local.packages_dir
+  service_env = terraform.workspace
+
+  inksoft_orders_table_name = module.data-storage.inksoft_orders_table.name
+
+  eventbridge_rule_arn = module.eventbridge.eventbridge_rule_arns["printful-package-shipped"]
+  target_eventbridge_arn = module.eventbridge.eventbridge_bus_arn
+
+  inksoft_api_key_secret_id = var.inksoft__api-key-secret-id
+}
+
 module "printful-order-fulfillment-service" {
   source = "./services/printful-order-fulfillment"
 
@@ -176,6 +190,13 @@ module "eventbridge" {
       description = "Inksoft Order received or updated events"
       event_pattern = jsonencode({ "detail-type" : ["inksoft.order.received", "inksoft.order.updated"] })
     }
+    printful-package-shipped = {
+      description = "Printful package shipped event from webhook"
+      event_pattern = jsonencode({
+        "source": ["printful"],
+        "detail-type": ["package_shipped"]
+      })
+    }
     all-events = {
       description = "All events from the bus"
       event_pattern = jsonencode({ "source" : [{"prefix": ""}] })
@@ -193,6 +214,12 @@ module "eventbridge" {
       {
         name = "send-to-printful-order-fulfillment"
         arn = module.printful-order-fulfillment-service.events_queue.arn
+      }
+    ]
+    printful-package-shipped = [
+      {
+        name = "send-to-inksoft-order-shipments-writeback"
+        arn = module.inksoft-order-shipments-writeback-service.events_queue.arn
       }
     ]
     all-events = [
