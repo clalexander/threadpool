@@ -90,6 +90,9 @@ export class DynamoDBDataProvider<
   }
 
   public async getItems(options: KeyOptions[]): Promise<T[]> {
+    if (options.length === 0) {
+      return [];
+    }
     const keys = this.marshallData(options);
     const items: T[] = [];
     do {
