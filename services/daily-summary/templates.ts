@@ -7,6 +7,7 @@ THREADPOOL DAILY SUMMARY
 New orders: {{ordersCount}} ({{ordersSentCount}} sent to Printful)
 New order volume: {{orderVolume}}
 Items sold: {{itemsCount}}
+Shipments: {{shipmentsCount}} ({{shipmentsWrittenBackCount}} sent to InkSoft)
 
 {{#hasIssues}}
 SYSTEM ISSUES
