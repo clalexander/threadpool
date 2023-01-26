@@ -13,7 +13,8 @@
       "Action": [
         "dynamodb:BatchGetItem",
         "dynamodb:GetItem",
-        "dynamodb:Query"
+        "dynamodb:Query",
+        "dynamodb:Scan"
       ],
       "Resource": [
         "arn:aws:dynamodb:${AWS_REGION}:${AWS_ACCOUNT}:table/${SUMMARY_EVENTS_TABLE_NAME}",

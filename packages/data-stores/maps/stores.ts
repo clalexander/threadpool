@@ -17,7 +17,7 @@ export type StoresMapQueryOptions = {
 export const StoresMapQuerySpecs: QuerySpec[] = [
   {
     index: 'PrintfulStoreId',
-    keyConditionExpression: 'printful_store_id = :id',
+    conditionExpression: 'printful_store_id = :id',
     expressionAttributeValues: {
       ':id': 'printful_store_id',
     },
