@@ -36,6 +36,8 @@ Temporary Items
 
 # Local
 .env
+.envrc
+.env.*
 /dist
 /ext
 /reports
@@ -44,3 +46,6 @@ Temporary Items
 temp
 *.temp
 *.tmp
+
+# Misc
+.rollup.cache

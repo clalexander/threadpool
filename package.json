@@ -4,23 +4,43 @@
   "description": "Threadpool connects InkSoft and Printful",
   "main": "index.js",
   "scripts": {
+    "build": "rollup -c rollup.config.js --bundleConfigAsCjs",
+    "build:watch": "rollup -c rollup.config.js --bundleConfigAsCjs --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Christopher Alexander",
   "license": "ISC",
   "dependencies": {
+    "aws-lambda": "^1.0.7",
+    "aws-sdk": "^2.1292.0",
     "axios": "^1.2.2",
-    "http-status-codes": "^2.2.0"
+    "cache-manager": "^5.1.4",
+    "fast-redact": "^3.1.2",
+    "mustache": "^4.2.0",
+    "type-fest": "^3.5.1"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^24.0.0",
+    "@rollup/plugin-json": "^6.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.1",
+    "@rollup/plugin-terser": "^0.3.0",
+    "@rollup/plugin-typescript": "^11.0.0",
+    "@types/aws-lambda": "^8.10.109",
+    "@types/cache-manager": "^4.0.2",
+    "@types/command-line-args": "^5.2.0",
+    "@types/fast-redact": "^3.0.2",
+    "@types/mustache": "^4.2.2",
     "@types/node": "^18.11.18",
     "@typescript-eslint/eslint-plugin": "^5.48.0",
     "@typescript-eslint/parser": "^5.48.0",
+    "command-line-args": "^5.2.1",
     "eslint": "^8.31.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "^17.0.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-watch": "^8.0.0",
-    "typescript": "^4.9.4"
+    "rollup": "^3.9.1",
+    "rollup-plugin-zip": "^1.0.3",
+    "typescript": "4.8"
   }
 }
