@@ -1,11 +1,11 @@
 import { ShipmentInfo } from './shipment-info';
 
-export interface WebhookEvent<T = any> {
-  type: WebhookEvent.Type;
+export interface WebhookEvent<T extends WebhookEvent.Type = any> {
+  type: T;
   created: number;
   retries: number;
   store: number;
-  data: T;
+  data: WebhookEvent.DataTypeMap<T>;
 }
 
 export namespace WebhookEvent {
