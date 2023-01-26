@@ -4,7 +4,7 @@ export interface OrderShipment {
   service: string; // delivery service name
   tracking_number: string;
   tracking_url: string;
-  create: number;
+  created: number;
   ship_date: string;
   shipped_at: string; // ship time in unix timestamp
   reshipment: boolean;
