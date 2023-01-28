@@ -1,8 +1,13 @@
-import { PrintfulApiModule, Response, WebhookInfo } from 'printful/types';
+import {
+  PrintfulApiModule,
+  Response,
+  WebhookInfo,
+  WebhookSetup,
+} from 'printful/types';
 
 export interface Webhooks {
   get(storeId: number): Promise<Response<WebhookInfo>>;
-  setup(storeId: number, webhook: WebhookInfo): Promise<Response<WebhookInfo>>;
+  setup(storeId: number, webhook: WebhookSetup): Promise<Response<WebhookInfo>>;
   disable(storeId: number): Promise<Response<WebhookInfo>>;
 }
 
@@ -13,7 +18,7 @@ const webhooksModule: PrintfulApiModule<Webhooks> = {
       method: 'GET',
       storeId,
     }),
-    setup: (storeId: number, webhook: WebhookInfo) => makeRequest({
+    setup: (storeId: number, webhook: WebhookSetup) => makeRequest({
       method: 'POST',
       data: webhook,
       storeId,
