@@ -5,8 +5,11 @@
     "inksoft-order-summary-translator",
     "inksoft-order-shipments-writeback",
     "printful-order-fulfillment",
+    "printful-webhook",
+    "printful-webhook-manager",
     "summary-injest-events",
     "daily-summary",
-    "printful-webhook"
+    "stores-map-event-stream",
+    "stores-map-translator"
   ]
 }

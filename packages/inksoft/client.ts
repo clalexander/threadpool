@@ -1,21 +1,21 @@
 import { ApiClient } from 'api-client';
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { convertDateStrings } from 'utils';
-import { INKSOFT_API_BASE_URL } from './constants';
 import modules from './modules';
 import { AdditionalRequestOptions } from './types';
 import { serialize } from './utils';
 
 export interface InkSoftOptions {
+  baseURL: string;
   APIKey: string;
 }
 
 export class InkSoft extends ApiClient(modules) {
   private APIKey: string;
 
-  constructor({ APIKey }: InkSoftOptions) {
+  constructor({ baseURL, APIKey }: InkSoftOptions) {
     super({
-      baseURL: INKSOFT_API_BASE_URL,
+      baseURL,
       paramsSerializer: {
         serialize,
       },

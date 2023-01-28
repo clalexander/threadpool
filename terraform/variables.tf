@@ -23,6 +23,10 @@ variable "inksoft__api-key-secret-id" {
   type = string
 }
 
+variable "inksoft__api-base-url-param-id" {
+  type = string
+}
+
 variable "inksoft__orders-sync-frequency" {
   type = number
   description = "Frequency in minutes"

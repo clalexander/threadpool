@@ -1,0 +1,23 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:DescribeSecret"
+      ],
+      "Resource": [
+        "arn:aws:secretsmanager:${AWS_REGION}:${AWS_ACCOUNT}:secret:${PRINTFUL_WEBHOOK_TOKEN_SECRET_ID}-*",
+        "arn:aws:secretsmanager:${AWS_REGION}:${AWS_ACCOUNT}:secret:${PRINTFUL_API_TOKEN_SECRET_ID}-*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "events:PutEvents"
+      ],
+      "Resource": "${TARGET_EVENTBRIDGE_ARN}"
+    }
+  ]
+}

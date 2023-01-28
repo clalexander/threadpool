@@ -55,6 +55,7 @@ module "inksoft-orders-sync-service" {
   target_eventbridge_arn = module.eventbridge.eventbridge_bus_arn
 
   inksoft_api_key_secret_id = var.inksoft__api-key-secret-id
+  inksoft_api_base_url_param_id = var.inksoft__api-base-url-param-id
   min_start_time_param_id = var.inksoft__orders-sync-min-start-time-param-id
   start_offset_param_id = var.inksoft__orders-sync-start-offset-param-id
 }
@@ -71,6 +72,7 @@ module "inksoft-order-summary-translator-service" {
   target_eventbridge_arn = module.eventbridge.eventbridge_bus_arn
 
   inksoft_api_key_secret_id = var.inksoft__api-key-secret-id
+  inksoft_api_base_url_param_id = var.inksoft__api-base-url-param-id
 }
 
 module "inksoft-order-shipments-writeback-service" {
@@ -85,6 +87,7 @@ module "inksoft-order-shipments-writeback-service" {
   target_eventbridge_arn = module.eventbridge.eventbridge_bus_arn
 
   inksoft_api_key_secret_id = var.inksoft__api-key-secret-id
+  inksoft_api_base_url_param_id = var.inksoft__api-base-url-param-id
 }
 
 module "printful-order-fulfillment-service" {
@@ -102,7 +105,7 @@ module "printful-order-fulfillment-service" {
   printful_api_token_secret_id = var.printful__api-token-secret-id
 }
 
-module "printful-webhook" {
+module "printful-webhook-service" {
   source = "./services/printful-webhook"
 
   packages_dir = local.packages_dir
@@ -113,7 +116,43 @@ module "printful-webhook" {
   webhook_token_secret_id = var.printful-webhook__token-secret-id
 }
 
-module "summary-injest-events" {
+module "printful-webhook-manager-service" {
+  source = "./services/printful-webhook-manager"
+
+  packages_dir = local.packages_dir
+  service_env = terraform.workspace
+
+  eventbridge_rule_arn = module.eventbridge.eventbridge_rule_arns["printful-webhook-config"]
+  target_eventbridge_arn = module.eventbridge.eventbridge_bus_arn
+
+  printful_api_token_secret_id = var.printful__api-token-secret-id
+  printful_webhook_url = module.printful-webhook-service.api_gateway_endpoint
+  printful_webhook_token_secret_id = var.printful-webhook__token-secret-id
+}
+
+module "stores-map-event-stream-service" {
+  source = "./services/stores-map-event-stream"
+
+  packages_dir = local.packages_dir
+  service_env = terraform.workspace
+
+  target_eventbridge_arn = module.eventbridge.eventbridge_bus_arn
+
+  stores_map_table_name = module.data-storage.stores_map_table.name
+  stores_map_table_stream_arn = module.data-storage.stores_map_table.stream_arn
+}
+
+module "stores-map-translator-service" {
+  source = "./services/stores-map-translator"
+
+  packages_dir = local.packages_dir
+  service_env = terraform.workspace
+
+  eventbridge_rule_arn = module.eventbridge.eventbridge_rule_arns["stores-map-events"]
+  target_eventbridge_arn = module.eventbridge.eventbridge_bus_arn
+}
+
+module "summary-injest-events-service" {
   source = "./services/summary-injest-events"
 
   packages_dir = local.packages_dir
@@ -125,7 +164,7 @@ module "summary-injest-events" {
   eventbridge_rule_arn = module.eventbridge.eventbridge_rule_arns["all-events"]
 }
 
-module "daily-summary" {
+module "daily-summary-service" {
   source = "./services/daily-summary"
 
   packages_dir = local.packages_dir
@@ -138,7 +177,7 @@ module "daily-summary" {
   sns_email_notifications_arn = module.notifications.sns_email_notifications.arn
 }
 
-module "data-lake-injest-events" {
+module "data-lake-injest-events-service" {
   source = "./services/data-lake-injest-events"
 
   packages_dir = local.packages_dir
@@ -178,7 +217,13 @@ module "eventbridge" {
 
   attach_sqs_policy = true
   sqs_target_arns = [
-    module.data-lake-injest-events.events_queue.arn
+    module.inksoft-order-summary-translator-service.events_queue.arn,
+    module.printful-order-fulfillment-service.events_queue.arn,
+    module.inksoft-order-shipments-writeback-service.events_queue.arn,
+    module.printful-webhook-manager-service.events_queue.arn,
+    module.stores-map-translator-service.events_queue.arn,
+    module.data-lake-injest-events-service.events_queue.arn,
+    module.summary-injest-events-service.events_queue.arn
   ]
 
   rules = {
@@ -196,6 +241,14 @@ module "eventbridge" {
         "source": ["printful"],
         "detail-type": ["package_shipped"]
       })
+    }
+    printful-webhook-config = {
+      description = "Printful webhook config events"
+      event_pattern = jsonencode({ "detail-type" : [{"prefix": "printful_webhook_config."}] })
+    }
+    stores-map-events = {
+      description = "All stores map events"
+      event_pattern = jsonencode({ "detail-type" : [{"prefix": "stores_map."}] })
     }
     all-events = {
       description = "All events from the bus"
@@ -222,14 +275,26 @@ module "eventbridge" {
         arn = module.inksoft-order-shipments-writeback-service.events_queue.arn
       }
     ]
+    printful-webhook-config = [
+      {
+        name = "send-to-printful-webhook-manager"
+        arn = module.printful-webhook-manager-service.events_queue.arn
+      }
+    ]
+    stores-map-events = [
+      {
+        name = "send-to-stores-map-translator"
+        arn = module.stores-map-translator-service.events_queue.arn
+      }
+    ]
     all-events = [
       {
         name = "send-to-data-lake"
-        arn = module.data-lake-injest-events.events_queue.arn
+        arn = module.data-lake-injest-events-service.events_queue.arn
       },
       {
         name = "send-to-summary-events"
-        arn = module.summary-injest-events.events_queue.arn
+        arn = module.summary-injest-events-service.events_queue.arn
       },
       {
         count = local.is_prod ? 0 : 1
@@ -276,7 +341,7 @@ module "default-eventbridge" {
     daily-summary = [
       {
         name = "daily-summary"
-        arn = module.daily-summary.lambda_function_arn
+        arn = module.daily-summary-service.lambda_function_arn
       }
     ]
   }

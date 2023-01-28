@@ -5,7 +5,7 @@ import { Printful } from './client';
 
 const CACHE_MAX = parseEnvInt('CACHE_MAX') || 100;
 const CACHE_TTL = parseEnvInt('CACHE_TTL') || 300;
-const API_TOKEN_SECRET_ID = process.env.API_TOKEN_SECRET_ID || '';
+const PRINTFUL_API_TOKEN_SECRET_ID = process.env.PRINTFUL_API_TOKEN_SECRET_ID || '';
 
 const secretsManager = new SecretsManagerProvider({
   max: CACHE_MAX,
@@ -14,11 +14,11 @@ const secretsManager = new SecretsManagerProvider({
 
 async function getPrintfulApiToken(): Promise<string> {
   try {
-    const { secret } = await secretsManager.getSecret<Secret>(API_TOKEN_SECRET_ID);
+    const { secret } = await secretsManager.getSecret<Secret>(PRINTFUL_API_TOKEN_SECRET_ID);
     return secret;
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.log('ERROR: fetching Printful api key secret:', API_TOKEN_SECRET_ID);
+    console.log('ERROR: fetching Printful api key secret:', PRINTFUL_API_TOKEN_SECRET_ID);
     throw error;
   }
 }

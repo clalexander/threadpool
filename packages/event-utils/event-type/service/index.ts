@@ -4,6 +4,9 @@ import { InkSoftOrderSummaryTranslatorServiceEventType } from './inksoft-order-s
 import { InkSoftOrderSyncServiceEventType } from './inksoft-orders-sync';
 import { PrintfulOrderFulfillmentServiceEventType } from './printful-order-fulfillment';
 import { PrintfulWebhookServiceEventType } from './printful-webhook';
+import { PrintfulWebhookManagerServiceEventType } from './printful-webhook-manager';
+import { StoresMapEventStreamServiceEventType } from './stores-map-event-stream';
+import { StoresMapTranslatorServiceEventType } from './stores-map-translator';
 
 export type ServiceEventType =
   | InkSoftOrderSyncServiceEventType
@@ -11,4 +14,7 @@ export type ServiceEventType =
   | InkSoftOrderShipmentsWritebackServiceEventType
   | PrintfulOrderFulfillmentServiceEventType
   | PrintfulWebhookServiceEventType
-  | DailySummaryServiceEventType;
+  | PrintfulWebhookManagerServiceEventType
+  | DailySummaryServiceEventType
+  | StoresMapEventStreamServiceEventType
+  | StoresMapTranslatorServiceEventType;

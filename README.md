@@ -37,14 +37,22 @@ npm run build -- --only <service_name>
 
 Source code deployment packages are saved to `/dist`.
 
+** Note: Rollup might run out of memory during the build process.  Build the remaining packages individually.
+
 ## Configuration
 
 ### Secrets
 
-Create a secret in AWS Secrets Manager for each your InkSoft and Printful API keys/tokens:
+Create a secret in AWS Secrets Manager for each of the following:
+
+Your InkSoft and Printful API keys/tokens:
 
 - `prod/InkSoft/ApiKey`
 - `prod/Printful/ApiAccessToken`
+
+A cryptographic token for the Printful webhook:
+
+- `prod/Printful/WebhookToken`
 
 ### Parameters
 
@@ -52,6 +60,7 @@ Create the following parameters in AWS Systems Manager:
 
 | **Parameter**                | **Value**    | **Description**                                                                                    |
 |------------------------------|--------------|----------------------------------------------------------------------------------------------------|
+| `/prod/InkSoft/baseURL` | `<url>` | Base URL for InkSoft store               |
 | `/prod/InkSoft/minStartTime` | `1672549200` | Unix timestamp for the earliest start date for fetching order summaries from InkSoft               |
 | `/prod/InkSoft/startOffset`  | `5`          | Time in seconds to overlap start/end date ranges on consecutive order summary fetches from InkSoft |
 | `/prod/SummaryEvents/ttl`    | `604800`     | TTL time in seconds for summary events, must be greater than one day                               |
@@ -115,6 +124,10 @@ inksoft_store_id: number // InkSoft store id
 printful_store_id: number // Printful store id
 name: string // Name of store(s) (optional)
 ```
+
+### Add Emails to Email Notifications SNS Topic
+
+Create subscriptions to the AWS SNS `Threadpool_EmailNotifications` topic to receive email notifications like the daily summary.
 
 ## Update Configuration
 

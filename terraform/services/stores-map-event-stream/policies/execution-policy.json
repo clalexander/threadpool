@@ -1,0 +1,29 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "events:PutEvents"
+      ],
+      "Resource": "${TARGET_EVENTBRIDGE_ARN}"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:Query",
+        "dynamodb:BatchGetItem",
+        "dynamodb:GetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:DescribeStream",
+        "dynamodb:ListStreams"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:${AWS_REGION}:${AWS_ACCOUNT}:table/${STORES_MAP_TABLE_NAME}",
+        "arn:aws:dynamodb:${AWS_REGION}:${AWS_ACCOUNT}:table/${STORES_MAP_TABLE_NAME}/index/*",
+        "arn:aws:dynamodb:${AWS_REGION}:${AWS_ACCOUNT}:table/${STORES_MAP_TABLE_NAME}/stream/*"
+      ]
+    }
+  ]
+}

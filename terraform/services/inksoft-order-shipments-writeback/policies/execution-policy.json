@@ -12,6 +12,15 @@
     {
       "Effect": "Allow",
       "Action": [
+        "ssm:GetParameter"
+      ],
+      "Resource": [
+        "arn:aws:ssm:${AWS_REGION}:${AWS_ACCOUNT}:parameter${INKSOFT_API_BASE_URL_PARAM_ID}"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
         "events:PutEvents"
       ],
       "Resource": "${TARGET_EVENTBRIDGE_ARN}"

@@ -62,6 +62,9 @@ resource "aws_dynamodb_table" "stores_map" {
 
   hash_key = "inksoft_store_id"
 
+  stream_enabled = true
+  stream_view_type = "NEW_AND_OLD_IMAGES"
+
   attribute {
     name = "inksoft_store_id"
     type = "N"

@@ -1,0 +1,5 @@
+export const PRINTFUL_WEBHOOK_URL = process.env.PRINTFUL_WEBHOOK_URL || '';
+export const PRINTFUL_WEBHOOK_TOKEN_SECRET_ID = process.env.PRINTFUL_WEBHOOK_TOKEN_SECRET_ID || '';
+export const TARGET_EVENTBRIDGE_ARN = process.env.TARGET_EVENTBRIDGE_ARN || '';
+
+export const WEBHOOK_TOKEN_QUERY_PARAM = 'token';
