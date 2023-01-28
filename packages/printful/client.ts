@@ -25,12 +25,12 @@ export class Printful extends ApiClient(modules) {
   protected requestInterceptor(
     request: AxiosRequestConfig & AdditionalRequestOptions,
   ): AxiosRequestConfig {
-    const { storeId, ...remainingOptions } = request;
+    const { storeId, headers, ...remainingOptions } = request;
     if (storeId) {
       return {
         ...remainingOptions,
         headers: {
-          ...(remainingOptions.headers || {}) as RawAxiosRequestHeaders,
+          ...(headers || {}) as RawAxiosRequestHeaders,
           'X-PF-Store-Id': storeId,
         },
       };

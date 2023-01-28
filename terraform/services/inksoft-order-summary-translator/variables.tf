@@ -31,3 +31,7 @@ variable "packages_dir" {
 variable "inksoft_api_key_secret_id" {
   type = string
 }
+
+variable "inksoft_api_base_url_param_id" {
+  type = string
+}

@@ -13,11 +13,11 @@ export type PrintfulOrderQueryOptions = {
 export const PrintfulOrderQuerySpecs: QuerySpec[] = [
   {
     index: 'ExternalId',
-    keyConditionExpression: 'external_id = :eid',
+    conditionExpression: 'external_id = :eid',
     expressionAttributeValues: {
       ':eid': 'external_id',
     },
-    getItemAfterQuery: true,
+    getItemsAfterQuery: true,
   },
 ];
 

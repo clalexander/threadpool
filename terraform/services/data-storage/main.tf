@@ -62,6 +62,9 @@ resource "aws_dynamodb_table" "stores_map" {
 
   hash_key = "inksoft_store_id"
 
+  stream_enabled = true
+  stream_view_type = "NEW_AND_OLD_IMAGES"
+
   attribute {
     name = "inksoft_store_id"
     type = "N"
@@ -90,36 +93,8 @@ resource "aws_dynamodb_table" "summary_events" {
     type = "S"
   }
 
-  attribute {
-    name = "type"
-    type = "S"
-  }
-
-  attribute {
-    name = "object"
-    type = "S"
-  }
-
-  attribute {
-    name = "created"
-    type = "S"
-  }
-
   ttl {
     enabled = true
     attribute_name = "expires"
-  }
-
-  global_secondary_index {
-    name = "Type"
-    hash_key = "type"
-    projection_type = "ALL"
-  }
-
-  global_secondary_index {
-    name = "Created"
-    hash_key = "object"
-    range_key = "created"
-    projection_type = "ALL"
   }
 }

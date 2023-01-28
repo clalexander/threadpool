@@ -1,10 +1,5 @@
 import { DynamoDBDataProvider, QuerySpec } from 'aws-utils';
-
-export interface StoresMap {
-  inksoft_store_id: number;
-  printful_store_id: number;
-  name?: string;
-}
+import { StoresMap } from 'types';
 
 export interface StoresMapKeyOptions {
   inksoft_store_id: number;
@@ -17,7 +12,7 @@ export type StoresMapQueryOptions = {
 export const StoresMapQuerySpecs: QuerySpec[] = [
   {
     index: 'PrintfulStoreId',
-    keyConditionExpression: 'printful_store_id = :id',
+    conditionExpression: 'printful_store_id = :id',
     expressionAttributeValues: {
       ':id': 'printful_store_id',
     },

@@ -8,6 +8,7 @@ data "template_file" "execution_policy" {
     AWS_REGION = data.aws_region.current.name
     TABLE_NAME = var.inksoft_orders_table_name
     TARGET_EVENTBRIDGE_ARN = var.target_eventbridge_arn
+    INKSOFT_API_BASE_URL_PARAM_ID = var.inksoft_api_base_url_param_id
     INKSOFT_API_KEY_SECRET_ID = var.inksoft_api_key_secret_id
   }
 }
@@ -26,7 +27,8 @@ module "event-processor" {
 
   lambda_env_vars = {
     SERVICE_ENV = var.service_env
-    API_KEY_SECRET_ID = var.inksoft_api_key_secret_id
+    INKSOFT_API_BASE_URL_PARAM_ID = var.inksoft_api_base_url_param_id
+    INKSOFT_API_KEY_SECRET_ID = var.inksoft_api_key_secret_id
     TARGET_EVENTBRIDGE_ARN = var.target_eventbridge_arn
     TABLE_NAME = var.inksoft_orders_table_name
   }

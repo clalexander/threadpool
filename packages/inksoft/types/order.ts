@@ -246,3 +246,10 @@ export interface GetOrderOptions {
   OrderEmail: string;
   IncludeProductionCards?: boolean;
 }
+
+export interface CreateOrderShipmentsOptions {
+  OrderIds: (number | string)[]; // HERE will the unique ids also work?
+  TrackingNumber: string;
+  MarkOrderAsCompleted?: boolean;
+  NotifyCustomer?: boolean;
+}

@@ -2,7 +2,7 @@ import { Event, makeEventRedact } from 'event-utils';
 import { redactPaths } from './redact-paths';
 
 export function eventKey(event: Event): string {
-  const { id } = event;
+  const { id, source } = event;
   if (id === undefined) {
     throw new Error('Event missing id');
   }
@@ -14,7 +14,7 @@ export function eventKey(event: Event): string {
   const minute = zeroPad(created.getUTCMinutes(), 2);
   return [
     'raw-files',
-    event.source,
+    source,
     year,
     month,
     day,

@@ -5,19 +5,25 @@ import { aws } from './aws';
 
 const BATCH_GET_MAX_KEYS_LENGTH = 100;
 
-export interface QuerySpec {
-  index?: string;
-  keyConditionExpression: string;
+export interface FilterSpec {
+  conditionExpression: string;
   expressionAttributeValues: Record<string, string>;
   expressionAttributeNames?: Record<string, string>;
-  getItemAfterQuery?: boolean;
 }
+
+export interface QuerySpec extends FilterSpec {
+  index: string;
+  getItemsAfterQuery?: boolean;
+}
+
+export interface ScanSpec extends FilterSpec {}
 
 export type AttributeValue<T> = JsonValue | ((item: T) => JsonValue);
 export type AdditionalAttributes<T> = Record<string, AttributeValue<T>>;
 
 export interface DynamoDBDataProviderOptions<T> {
   querySpecs?: QuerySpec[];
+  scanSpecs?: ScanSpec[];
   convertDateStrings?: boolean; // defaults to true
   additionalAttributes?: AdditionalAttributes<T>;
 }
@@ -26,6 +32,7 @@ export class DynamoDBDataProvider<
   T = any,
   KeyOptions extends Record<string, any> = Record<string, any>,
   QueryOptions extends Record<string, any> = Record<string, any>,
+  ScanOptions extends Record<string, any> = Record<string, any>,
 > {
   private readonly db = aws().dynamoDB();
 
@@ -35,6 +42,8 @@ export class DynamoDBDataProvider<
   ) {}
 
   protected get querySpecs() { return this.options?.querySpecs || []; }
+
+  protected get scanSpecs() { return this.options?.scanSpecs || []; }
 
   protected get convertDateStrings() { return this.options?.convertDateStrings !== false; }
 
@@ -90,6 +99,9 @@ export class DynamoDBDataProvider<
   }
 
   public async getItems(options: KeyOptions[]): Promise<T[]> {
+    if (options.length === 0) {
+      return [];
+    }
     const keys = this.marshallData(options);
     const items: T[] = [];
     do {
@@ -183,7 +195,7 @@ export class DynamoDBDataProvider<
     const baseParams = {
       ExpressionAttributeValues: expressionAttributeValues,
       ExpressionAttributeNames: spec.expressionAttributeNames,
-      KeyConditionExpression: spec.keyConditionExpression,
+      KeyConditionExpression: spec.conditionExpression,
       IndexName: spec.index,
       TableName: this.tableName,
     };
@@ -194,7 +206,7 @@ export class DynamoDBDataProvider<
         ...baseParams,
       };
       if (lastEvaluatedKey) {
-        Object.assign(params, { LastEvaluatedKey: lastEvaluatedKey });
+        Object.assign(params, { ExclusiveStartKey: lastEvaluatedKey });
       }
       const request = this.db.query(params);
       // eslint-disable-next-line no-await-in-loop
@@ -207,9 +219,48 @@ export class DynamoDBDataProvider<
       items.push(...batchItems);
       lastEvaluatedKey = LastEvaluatedKey;
     } while (lastEvaluatedKey);
-    if (spec.getItemAfterQuery) {
+    if (spec.getItemsAfterQuery) {
       return this.getItems(items as KeyOptions[]);
     }
+    return items as T[];
+  }
+
+  public async scanItems(options: ScanOptions): Promise<T[]> {
+    const keys = Object.keys(options);
+    const spec = this.scanSpecs.find((ss) => Object.values(ss.expressionAttributeValues)
+      .every((key) => keys.includes(key)));
+    if (!spec) {
+      throw new Error('Invalid scan options, no spec defined for options');
+    }
+    const marshalledAttributes = this.marshallData(options);
+    const expressionAttributeValues = Object.entries(spec.expressionAttributeValues)
+      .reduce((acc, [key, value]) => ({ ...acc, [key]: marshalledAttributes[value] }), {});
+    const baseParams = {
+      ExpressionAttributeValues: expressionAttributeValues,
+      ExpressionAttributeNames: spec.expressionAttributeNames,
+      FilterExpression: spec.conditionExpression,
+      TableName: this.tableName,
+    };
+    let lastEvaluatedKey: DynamoDB.Key | undefined;
+    const items = [];
+    do {
+      const params = {
+        ...baseParams,
+      };
+      if (lastEvaluatedKey) {
+        Object.assign(params, { ExclusiveStartKey: lastEvaluatedKey });
+      }
+      const request = this.db.scan(params);
+      // eslint-disable-next-line no-await-in-loop
+      const result = await request.promise();
+      const { Items, LastEvaluatedKey } = result;
+      if (!Items) {
+        break;
+      }
+      const batchItems = this.unmarshallData(Items);
+      items.push(...batchItems);
+      lastEvaluatedKey = LastEvaluatedKey;
+    } while (lastEvaluatedKey);
     return items as T[];
   }
 }

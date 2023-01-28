@@ -23,6 +23,10 @@ variable "inksoft__api-key-secret-id" {
   type = string
 }
 
+variable "inksoft__api-base-url-param-id" {
+  type = string
+}
+
 variable "inksoft__orders-sync-frequency" {
   type = number
   description = "Frequency in minutes"
@@ -37,6 +41,10 @@ variable "inksoft__orders-sync-start-offset-param-id" {
 }
 
 variable "printful__api-token-secret-id" {
+  type = string
+}
+
+variable "printful-webhook__token-secret-id" {
   type = string
 }
 

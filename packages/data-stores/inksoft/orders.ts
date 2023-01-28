@@ -6,18 +6,26 @@ export interface InkSoftOrderKeyOptions {
   StoreId: number;
 }
 
+export type InkSoftOrderQueryOptions = {
+  UniqueId: string
+};
+
 export const InkSoftOrderQuerySpecs: QuerySpec[] = [
   {
     index: 'UniqueId',
-    keyConditionExpression: 'UniqueId = :uid',
+    conditionExpression: 'UniqueId = :uid',
     expressionAttributeValues: {
       ':uid': 'UniqueId',
     },
-    getItemAfterQuery: true,
+    getItemsAfterQuery: true,
   },
 ];
 
-export class InkSoftOrdersData extends DynamoDBDataProvider<Order, InkSoftOrderKeyOptions> {
+export class InkSoftOrdersData extends DynamoDBDataProvider<
+Order,
+InkSoftOrderKeyOptions,
+InkSoftOrderQueryOptions
+> {
   constructor(tableName: string) {
     super(tableName, {
       querySpecs: InkSoftOrderQuerySpecs,

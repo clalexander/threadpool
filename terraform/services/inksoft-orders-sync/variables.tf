@@ -28,6 +28,10 @@ variable "inksoft_api_key_secret_id" {
   type = string
 }
 
+variable "inksoft_api_base_url_param_id" {
+  type = string
+}
+
 variable "min_start_time_param_id" {
   type = string
 }

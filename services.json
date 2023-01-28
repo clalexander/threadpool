@@ -3,8 +3,13 @@
     "data-lake-injest-events",
     "inksoft-orders-sync",
     "inksoft-order-summary-translator",
+    "inksoft-order-shipments-writeback",
     "printful-order-fulfillment",
+    "printful-webhook",
+    "printful-webhook-manager",
     "summary-injest-events",
-    "daily-summary"
+    "daily-summary",
+    "stores-map-event-stream",
+    "stores-map-translator"
   ]
 }

@@ -1,27 +1,23 @@
 import { Event } from 'event-utils';
-import { DynamoDBDataProvider, QuerySpec } from 'aws-utils';
+import { DynamoDBDataProvider, ScanSpec } from 'aws-utils';
 
 export interface SummaryEventsKeyOptions {
   id: string;
 }
 
-export type SummaryEventsQueryOptions = {
+export type SummaryEventsQueryOptions = Record<string, any>;
+
+export type SummaryEventsScanOptions = {
   start: Date;
   end: Date;
-  object: string;
 };
 
-export const SummaryEventsQuerySpecs: QuerySpec[] = [
+export const SummaryEventsScanSpecs: ScanSpec[] = [
   {
-    index: 'Created',
-    keyConditionExpression: '#obj = :obj AND created BETWEEN :start AND :end',
+    conditionExpression: 'created BETWEEN :start AND :end',
     expressionAttributeValues: {
       ':start': 'start',
       ':end': 'end',
-      ':obj': 'object',
-    },
-    expressionAttributeNames: {
-      '#obj': 'object',
     },
   },
 ];
@@ -33,11 +29,12 @@ const additionalAttributes = (ttl: number) => ({
 export class SummaryEventsData extends DynamoDBDataProvider<
 Event,
 SummaryEventsKeyOptions,
-SummaryEventsQueryOptions
+SummaryEventsQueryOptions,
+SummaryEventsScanOptions
 > {
   constructor(tableName: string, ttl = 0) {
     super(tableName, {
-      querySpecs: SummaryEventsQuerySpecs,
+      scanSpecs: SummaryEventsScanSpecs,
       convertDateStrings: true,
       additionalAttributes: additionalAttributes(ttl),
     });

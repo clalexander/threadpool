@@ -47,6 +47,7 @@ data "template_file" "execution-policy" {
   vars = {
     AWS_REGION = data.aws_region.current.name
     AWS_ACCOUNT = data.aws_caller_identity.current.account_id
+    INKSOFT_API_BASE_URL_PARAM_ID = var.inksoft_api_base_url_param_id
     INKSOFT_API_KEY_SECRET_ID = var.inksoft_api_key_secret_id
     TARGET_EVENTBRIDGE_ARN = var.target_eventbridge_arn
     BUCKET_NAME = aws_s3_bucket.this.id
@@ -65,7 +66,8 @@ module "service" {
 
   environment_variables = {
     SERVICE_ENV = var.service_env
-    API_KEY_SECRET_ID = var.inksoft_api_key_secret_id
+    INKSOFT_API_BASE_URL_PARAM_ID = var.inksoft_api_base_url_param_id
+    INKSOFT_API_KEY_SECRET_ID = var.inksoft_api_key_secret_id
     TARGET_EVENTBRIDGE_ARN = var.target_eventbridge_arn
     BUCKET_NAME = aws_s3_bucket.this.id
     MIN_START_TIME_PARAM_ID = var.min_start_time_param_id
