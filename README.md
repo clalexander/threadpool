@@ -77,7 +77,7 @@ Create a `.env` and/or `.env.<environment>` file(s) in the `terraform` directory
 
 | **Variable**            | **Value**                                     | **Notes**                                                 |
 |-------------------------|-----------------------------------------------|-----------------------------------------------------------|
-| AWS_ACCOUN              | [aws-account-number]                          |                                                           |
+| AWS_ACCOUNT             | [aws-account-number]                          |                                                           |
 | AWS_PROFILE             | [aws-credentials-profile]                     | Profile for aws account                                   |
 | AWS_REGION              | [aws-region-name]
 | AWS_DEFAULT_REGION      | [aws-region-name]                             |                                                           |
